@@ -1,6 +1,6 @@
-# silkey-jwt
+# Silkey-jwt
 
-Package to generates and validates silkey compatible JWT.
+Package to generates and validates Silkey compatible JWT.
 
 ## Generate JWT
 
@@ -17,5 +17,6 @@ const token = silkeyJwtGenerator(ethers.Wallet.createRandom())
 import ethersjs from "ethers";
 import {silkeyJwtPayloadVerificator} from 'silkey-jwt'
 
+# returns null when fail and data when succeed
 const payload = silkeyJwtPayloadVerificator(token)
 ```

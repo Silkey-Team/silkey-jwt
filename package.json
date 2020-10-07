@@ -1,7 +1,7 @@
 {
   "name": "silkey-jwt",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Package to generates and validates Silkey compatible JWT",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
@@ -19,8 +19,8 @@
   "homepage": "https://silkey.io",
   "devDependencies": {
     "chai": "^4.2.0",
-    "ethers": "^5.0.8",
+    "ethers": "^5.0.15",
     "jsonwebtoken": "^8.5.1",
-    "mocha": "^8.1.1"
+    "mocha": "^8.1.3"
   }
 }
