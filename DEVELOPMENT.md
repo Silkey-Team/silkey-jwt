@@ -1,10 +1,13 @@
-# Silkey-jwt
+# Silkey SDK
 
 
 ## Development
 
+### Init
+
     git clone [repo]
     git hf init
+    npx eslint --init
     git hf feature start [featue-name]
 
 ## Releasing
