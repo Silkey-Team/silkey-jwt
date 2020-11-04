@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Methods for signing SSO request 
 - jsdocs
 - new model: `JwtPayload`
+- support for scope:email
 
 ### Changed
 - Change package name from `silkey-jwt` to `silkey-sdk`

@@ -25,6 +25,7 @@
   "homepage": "https://silkey.io",
   "dependencies": {
     "ethers": "~5.0.15",
+    "int64-buffer": "^1.0.0",
     "jsonwebtoken": "~8.5.1"
   },
   "devDependencies": {

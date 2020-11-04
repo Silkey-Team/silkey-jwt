@@ -1,6 +1,14 @@
+import int64 from 'int64-buffer'
+
 export const isNotSet = function (v) {
   // eslint-disable-next-line valid-typeof
   return v === null || typeof v === 'undefined' || typeof v === undefined
+}
+
+export const intToBuffer = t => {
+  const hex = new int64.Int64BE(t).toBuffer().toString('hex')
+  const hexInt = hex.replace(/^0+/g, '')
+  return Buffer.from(`${hexInt.length % 2 === 0 ? '' : '0'}${hexInt}`, 'hex')
 }
 
 export const isSet = function (v) {

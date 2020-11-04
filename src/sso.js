@@ -3,7 +3,7 @@
  */
 
 import ethersjs from 'ethers'
-import { isEmpty, isSet } from './helpers.js'
+import { isEmpty, isSet } from './utils/helpers.js'
 import jwt from 'jsonwebtoken'
 import { toJwtPayload } from './models/index.js'
 
@@ -93,7 +93,7 @@ export const verifySilkeySignature = (tokenPayload, silkeyPublicKey) => {
 
     const signer = ethers.utils.verifyMessage(payload.messageToSignBySilkey(), payload.silkeySignature)
     const result = signer.toLowerCase() === silkeyPublicKey.toLowerCase()
-    !result && console.warn(`expect ${signer} to be equal ${silkeyPublicKey}`)
+    !result && console.warn(`verifySilkeySignature: expect ${signer} to be equal ${silkeyPublicKey}`)
 
     return result
   } catch (e) {

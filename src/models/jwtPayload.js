@@ -2,7 +2,7 @@
  * @module JwtPayloadModel
  */
 
-import { isEmpty, isEthereumAddress, isSignature } from '../helpers.js'
+import { intToBuffer, isEmpty, isEthereumAddress, isSignature } from '../utils/helpers.js'
 
 export const SCOPE_DIVIDER = ','
 
@@ -12,6 +12,7 @@ export const SCOPE_DIVIDER = ','
 function JwtPayloadObj () {
   this.scope = ''
   this.silkeySignature = null
+  this.silkeySignatureTimestamp = null
   this.userSignature = null
   this.address = null
 }
@@ -28,7 +29,9 @@ JwtPayloadObj.prototype.setScope = function (scope) {
 
   const map = {}
   const str = `${this.scope}${SCOPE_DIVIDER}${scope}`
-  str.split(SCOPE_DIVIDER).filter(k => !isEmpty(k)).forEach(k => { map[k] = k })
+  str.split(SCOPE_DIVIDER).filter(k => !isEmpty(k)).forEach(k => {
+    map[k] = k
+  })
   this.scope = Object.keys(map).join(SCOPE_DIVIDER)
 
   return this
@@ -79,12 +82,17 @@ JwtPayloadObj.prototype.setUserSignature = function (sig) {
   return this
 }
 
-JwtPayloadObj.prototype.setSilkeySignature = function (sig) {
+JwtPayloadObj.prototype.setSilkeySignature = function (sig, timestamp) {
   if (!isSignature(sig)) {
     throw Error(`silkey signature is invalid: ${sig}`)
   }
 
+  if (isEmpty(timestamp)) {
+    throw Error(`silkey signature timestamp is invalid: ${timestamp}`)
+  }
+
   this.silkeySignature = sig
+  this.silkeySignatureTimestamp = timestamp
   return this
 }
 
@@ -117,7 +125,14 @@ JwtPayloadObj.prototype.messageToSignByUser = function () {
  * @returns {string}
  */
 JwtPayloadObj.prototype.messageToSignBySilkey = function () {
-  return this.email || null
+  if (isEmpty(this.email)) {
+    return null
+  }
+
+  return Buffer.concat([
+    Buffer.from(this.email),
+    intToBuffer(this.silkeySignatureTimestamp)
+  ]).toString('hex')
 }
 
 JwtPayloadObj.prototype.export = function () {

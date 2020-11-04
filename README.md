@@ -1,4 +1,4 @@
-# Silkey SDK  
+# Silkey SDK
 [![GitHub version](https://badge.fury.io/gh/Silkey-Team%2Fsilkey-sdk.svg)](https://badge.fury.io/gh/Silkey-Team%2Fsilkey-sdk)
 [![npm version](https://badge.fury.io/js/silkey-sdk.svg)](//npmjs.com/package/silkey-sdk)
 
@@ -29,11 +29,38 @@ When user back to you page with JWT token, validate it and login user.
 npm i --save silkey-sdk
 ```
 
-### Include in your project
+### Draft integration description
 
 ```
-import {generateSSORequestParams, ssoPayloadVerifier} from 'silkey-sdk'
-```
+# on signin page
 
-## TODO
-- support of scope: email/null
+import silkeySdk from 'sdk'
+
+    const requestParams = silkeySdk.generateSSORequestParams(privateKey, {
+      redirectUrl: 'https://domain/callback', // make sure you support both GET and POST redirection,
+      scope: 'email',
+      refId: 'any-data-that-will-be-returned-to-you',
+      cancelUrl: 'https://domain/cancel',
+      timestamp: Math.round(Date.now() / 1000)
+    })
+
+    // redirect user to provided silkey URL with requestParams as query string
+
+# on callback page
+
+    import silkeySdk from 'sdk'
+
+    // infuraId|provider - you need to have infura.io account or you can use any other web3 provider
+    const {token, silkeyPublicKey} = silkeySdk.fetchSSOCallbackData(infuraId|provider)
+
+    const jwtPayload = silkeySdk.tokenPayloadVerifier(token, silkeyPublicKey)
+
+    if (jwtPayload === null) {
+      // authorization failed
+    } else {
+      const {address, email, refId} = jwtPayload
+      // address - use this as ID of the user
+
+      // you are ready to go...
+    }
+```
