@@ -1,7 +1,7 @@
 {
-  "name": "silkey-sdk",
-  "version": "0.1.0",
-  "description": "Package to generates and validates Silkey compatible JWT",
+  "name": "@silkey/sdk",
+  "version": "0.2.0",
+  "description": "Package to generates and validates Silkey JWT",
   "main": "src/index.js",
   "type": "module",
   "engines": {
@@ -15,12 +15,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Silkey-Team/silkey-jwt.git"
+    "url": "git+https://github.com/Silkey-Team/silkey-sdk.git"
   },
   "author": "Silkey.io",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Silkey-Team/silkey-jwt/issues"
+    "url": "https://github.com/Silkey-Team/silkey-sdk/issues"
   },
   "homepage": "https://silkey.io",
   "dependencies": {
@@ -44,5 +44,8 @@
     "hooks": {
       "pre-push": "npm run pre-push"
     }
+  },
+  "directories": {
+    "test": "test"
   }
 }
