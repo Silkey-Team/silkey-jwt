@@ -37,11 +37,11 @@ export const messageToSign = (data = {}) => {
  * @async
  * @method
  * @param privateKey {string} this should be private key of domain owner
- * @param data {{redirectUrl, cancelUrl, refId, scope, timestamp}} Object with data: {redirectUrl*, cancelUrl*, refId*, scope, timestamp}
+ * @param data {{redirectUrl, cancelUrl, refId, scope, sigTimestamp}} Object with data: {redirectUrl*, cancelUrl*, refId*, scope, sigTimestamp*}
  *  marked with * are required by Silkey SSO
- * @returns {{signature, message, timestamp, redirectUrl, refId, scope}}
+ * @returns {{signature, sigTimestamp, redirectUrl, refId, scope}}
  * @example
- * // returns {signature, message, timestamp, redirectUrl, refId, scope}
+ * // returns {signature, sigTimestamp, redirectUrl, refId, scope}
  * await generateSSORequestParams(domainOwnerPrivateKey, {redirectUrl: 'http://silkey.io', refId: 1});
  */
 export const generateSSORequestParams = async (privateKey, data = {}) => {
@@ -52,6 +52,7 @@ export const generateSSORequestParams = async (privateKey, data = {}) => {
   const scope = data.scope || null
 
   wallet = new ethers.Wallet(privateKey)
+
   const message = messageToSign({
     redirectUrl,
     cancelUrl,
@@ -59,10 +60,12 @@ export const generateSSORequestParams = async (privateKey, data = {}) => {
     refId,
     scope
   })
+
   const signature = await wallet.signMessage(message)
+
   return {
     signature,
-    message,
+    // message,
     sigTimestamp,
     redirectUrl,
     cancelUrl,

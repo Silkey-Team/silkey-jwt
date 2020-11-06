@@ -35,10 +35,10 @@ describe('sso.js', () => {
     })
 
     it('generates signature for SSO request', async () => {
-      const { signature, message } = await generateSSORequestParams(privateKey, { sigTimestamp: 1602151787 })
+      const { signature, sigTimestamp } = await generateSSORequestParams(privateKey, { sigTimestamp: 1602151787 })
 
       expect(signature).to.eq('0xb1185f29f9fb0bdddfad40a01dd904bc2a99b73041ff26e6288be0ff7a1f38e90e1b520cfb7dab7ae2ab439cd320bc13ce67e5d71b75a879f848c9ec169bf8ab1b')
-      expect(message).to.eq('cancelUrl=::redirectUrl=::refId=::scope=::sigTimestamp=1602151787')
+      expect(sigTimestamp).to.eq(1602151787)
     })
 
     it('sets timestamp when not provided', async () => {

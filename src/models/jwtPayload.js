@@ -14,6 +14,7 @@ function JwtPayloadObj () {
   this.silkeySignature = null
   this.silkeySignatureTimestamp = null
   this.userSignature = null
+  this.userSignatureTimestamp = null
   this.address = null
 }
 
@@ -68,17 +69,17 @@ JwtPayloadObj.prototype.setRefId = function (refId) {
   return this
 }
 
-JwtPayloadObj.prototype.setTimestamp = function () {
-  this.timestamp = Math.round(Date.now() / 1000)
-  return this
-}
-
-JwtPayloadObj.prototype.setUserSignature = function (sig) {
+JwtPayloadObj.prototype.setUserSignature = function (sig, timestamp) {
   if (!isSignature(sig)) {
     throw Error(`user signature is invalid: ${sig}`)
   }
 
+  if (isEmpty(timestamp)) {
+    throw Error(`user signature timestamp is invalid: ${timestamp}`)
+  }
+
   this.userSignature = sig
+  this.userSignatureTimestamp = timestamp
   return this
 }
 
@@ -105,7 +106,7 @@ JwtPayloadObj.prototype.setSilkeySignature = function (sig, timestamp) {
  */
 JwtPayloadObj.prototype.messageToSignByUser = function () {
   const keys = Object.keys(this)
-    .filter(k => !['silkeySignature', 'userSignature', 'email', 'iat'].includes(k))
+    .filter(k => !['silkeySignature', 'silkeySignatureTimestamp', 'userSignature', 'email', 'iat'].includes(k))
     .sort()
 
   const items = []
@@ -133,6 +134,38 @@ JwtPayloadObj.prototype.messageToSignBySilkey = function () {
     Buffer.from(this.email),
     intToBuffer(this.silkeySignatureTimestamp)
   ]).toString('hex')
+}
+
+JwtPayloadObj.prototype.validate = function () {
+  if (!isEthereumAddress(this.address)) {
+    throw new Error(`address is invalid: ${this.address}`)
+  }
+
+  if (!isSignature(this.userSignature)) {
+    throw new Error(`userSignature is invalid: ${this.userSignature}`)
+  }
+
+  if (isEmpty(this.userSignatureTimestamp)) {
+    throw new Error(`userSignatureTimestamp is invalid: ${this.userSignatureTimestamp}`)
+  }
+
+  if (this.scope === 'id') {
+    return this
+  }
+
+  if (isEmpty(this.email)) {
+    throw new Error(`email is invalid: ${this.email}`)
+  }
+
+  if (!isSignature(this.silkeySignature)) {
+    throw new Error(`silkeySignature is invalid: ${this.silkeySignature}`)
+  }
+
+  if (isEmpty(this.silkeySignatureTimestamp)) {
+    throw new Error(`silkeySignatureTimestamp is invalid: ${this.silkeySignatureTimestamp}`)
+  }
+
+  return this
 }
 
 JwtPayloadObj.prototype.export = function () {

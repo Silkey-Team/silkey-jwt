@@ -3,9 +3,24 @@
 ## SilkeySDK
 
 * [SilkeySDK](#module_SilkeySDK)
+    * [.verifySilkeySignature](#module_SilkeySDK.verifySilkeySignature) ⇒ <code>null</code> \| <code>boolean</code>
     * [.messageToSign(data)](#module_SilkeySDK.messageToSign) ⇒ <code>string</code>
     * [.generateSSORequestParams(privateKey, data)](#module_SilkeySDK.generateSSORequestParams) ⇒ <code>Object</code>
     * [.tokenPayloadVerifier(token, silkeyPublicKey)](#module_SilkeySDK.tokenPayloadVerifier) ⇒ <code>JwtPayload</code> \| <code>null</code>
+
+<a name="module_SilkeySDK.verifySilkeySignature"></a>
+
+### SilkeySDK.verifySilkeySignature ⇒ <code>null</code> \| <code>boolean</code>
+By default we do not check silkey signature (if not provided)
+as token is provided by silkey itself and therer is no incentives to manipulate with silkey signature
+But it is strongly recommended to provide silkeyPublicKey and have full validation.
+
+**Kind**: static constant of [<code>SilkeySDK</code>](#module_SilkeySDK)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| tokenPayload | <code>string</code> | token returned by silkey |
+| silkeyPublicKey | <code>string</code> | optional |
 
 <a name="module_SilkeySDK.messageToSign"></a>
 
@@ -33,11 +48,11 @@ Generates all needed parameters (including signature) for requesting Silkey SSO
 | Param | Type | Description |
 | --- | --- | --- |
 | privateKey | <code>string</code> | this should be private key of domain owner |
-| data | <code>Object</code> | Object with data: {redirectUrl*, cancelUrl*, refId*, scope, timestamp}  marked with * are required by Silkey SSO |
+| data | <code>Object</code> | Object with data: {redirectUrl*, cancelUrl*, refId*, scope, sigTimestamp*}  marked with * are required by Silkey SSO |
 
 **Example**  
 ```js
-// returns {signature, message, timestamp, redirectUrl, refId, scope}
+// returns {signature, sigTimestamp, redirectUrl, refId, scope}
 await generateSSORequestParams(domainOwnerPrivateKey, {redirectUrl: 'http://silkey.io', refId: 1});
 ```
 <a name="module_SilkeySDK.tokenPayloadVerifier"></a>
