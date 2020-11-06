@@ -35,23 +35,23 @@ describe('sso.js', () => {
     })
 
     it('generates signature for SSO request', async () => {
-      const { signature, message } = await generateSSORequestParams(privateKey, { timestamp: 1602151787 })
+      const { signature, message } = await generateSSORequestParams(privateKey, { sigTimestamp: 1602151787 })
 
-      expect(signature).to.eq('0xb7991dccf840cf5600c4d3d5506e7aeea5472562221eedfd405d12cb99acecc57672ec1c304e5530cdc909705fff3478c25471c0de20475cf5091b012300c0461b')
-      expect(message).to.eq('cancelUrl=::redirectUrl=::refId=::scope=::timestamp=1602151787')
+      expect(signature).to.eq('0xb1185f29f9fb0bdddfad40a01dd904bc2a99b73041ff26e6288be0ff7a1f38e90e1b520cfb7dab7ae2ab439cd320bc13ce67e5d71b75a879f848c9ec169bf8ab1b')
+      expect(message).to.eq('cancelUrl=::redirectUrl=::refId=::scope=::sigTimestamp=1602151787')
     })
 
     it('sets timestamp when not provided', async () => {
       const awaits = [
         generateSSORequestParams(privateKey),
-        generateSSORequestParams(privateKey, { timestamp: null }),
-        generateSSORequestParams(privateKey, { timestamp: '' })
+        generateSSORequestParams(privateKey, { sigTimestamp: null }),
+        generateSSORequestParams(privateKey, { sigTimestamp: '' })
       ]
 
       const results = await Promise.all(awaits)
 
-      results.forEach(({ timestamp }) => {
-        expect(timestamp).to.gte(t)
+      results.forEach(({ sigTimestamp }) => {
+        expect(sigTimestamp).to.gte(t)
       })
     })
 

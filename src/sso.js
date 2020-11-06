@@ -45,14 +45,14 @@ export const messageToSign = (data = {}) => {
 export const generateSSORequestParams = async (privateKey, data = {}) => {
   const redirectUrl = data.redirectUrl || null
   const cancelUrl = data.cancelUrl || null
-  const timestamp = data.timestamp || Math.round(Date.now() / 1000)
+  const sigTimestamp = data.sigTimestamp || Math.round(Date.now() / 1000)
   const refId = data.refId || null
   const scope = data.scope || null
 
   wallet = new ethers.Wallet(privateKey)
-  const message = messageToSign({ redirectUrl, cancelUrl, timestamp, refId, scope })
+  const message = messageToSign({ redirectUrl, cancelUrl, sigTimestamp, refId, scope })
   const signature = await wallet.signMessage(message)
-  return { signature, message, timestamp, redirectUrl, cancelUrl, refId, scope }
+  return { signature, message, sigTimestamp, redirectUrl, cancelUrl, refId, scope }
 }
 
 export const verifyUserSignature = tokenPayload => {

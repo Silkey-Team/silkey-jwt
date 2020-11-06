@@ -12,13 +12,13 @@ SDK package for integrate with Silkey standard of Decentralised SSO.
 
 Redirect user to `sso.silkey.io/signin` with parameters:
 
-| Parameter     | Required  | Desc  |
+| Parameter     | Required  | Type | Desc  |
 | ------------- |:---------:| ----- |
-| signature     | yes | Domain owner signature |
-| redirectUrl   | yes | Where to redirect user with token after sign in |
-| timestamp     | yes |    |
-| refId         | no  | It will be returned back with user token, you may use it to identify request |
-| scope         | no  | Scope of data to return in token payload: `id` (default) returns only user address, `email` returns address + email |
+| signature     | yes | string | Domain owner signature |
+| redirectUrl   | yes | string | Where to redirect user with token after sign in |
+| sigTimestamp  | yes | number | Timestamp of signature  |
+| refId         | no  | string | It will be return with user token, you may use it to identify request |
+| scope         | no  | string | Scope of data to return in a token payload: `id` (default) returns only user address, `email` returns address + email |
 
 
 When user back to you page with JWT token, validate it and login user.
@@ -41,7 +41,7 @@ import silkeySdk from 'sdk'
       scope: 'email',
       refId: 'any-data-that-will-be-returned-to-you',
       cancelUrl: 'https://domain/cancel',
-      timestamp: Math.round(Date.now() / 1000)
+      sigTimestamp: Math.round(Date.now() / 1000)
     })
 
     // redirect user to provided silkey URL with requestParams as query string
