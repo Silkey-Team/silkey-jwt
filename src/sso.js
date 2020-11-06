@@ -25,7 +25,9 @@ const parser = v => isEmpty(v) ? '' : v
  */
 export const messageToSign = (data = {}) => {
   const msg = []
-  Object.keys(data).sort().forEach(k => { msg.push(`${k}=${parser(data[k])}`) })
+  Object.keys(data).sort().forEach(k => {
+    msg.push(`${k}=${parser(data[k])}`)
+  })
   return msg.join('::')
 }
 
@@ -50,9 +52,23 @@ export const generateSSORequestParams = async (privateKey, data = {}) => {
   const scope = data.scope || null
 
   wallet = new ethers.Wallet(privateKey)
-  const message = messageToSign({ redirectUrl, cancelUrl, sigTimestamp, refId, scope })
+  const message = messageToSign({
+    redirectUrl,
+    cancelUrl,
+    sigTimestamp,
+    refId,
+    scope
+  })
   const signature = await wallet.signMessage(message)
-  return { signature, message, sigTimestamp, redirectUrl, cancelUrl, refId, scope }
+  return {
+    signature,
+    message,
+    sigTimestamp,
+    redirectUrl,
+    cancelUrl,
+    refId,
+    scope
+  }
 }
 
 export const verifyUserSignature = tokenPayload => {
@@ -73,8 +89,22 @@ export const verifyUserSignature = tokenPayload => {
   }
 }
 
-export const verifySilkeySignature = (tokenPayload, silkeyPublicKey) => {
+/**
+ * By default we do not check silkey signature (if not provided)
+ * as token is provided by silkey itself and therer is no incentives to manipulate with silkey signature
+ * But it is strongly recommended to provide silkeyPublicKey and have full validation.
+ *
+ * @param tokenPayload {string} token returned by silkey
+ * @param silkeyPublicKey {string} optional
+ * @return {null|boolean}
+ */
+export const verifySilkeySignature = (tokenPayload, silkeyPublicKey = null) => {
   try {
+    if (isEmpty(silkeyPublicKey)) {
+      console.warn('You are using verification without checking silkey signature. We strongly recommended to turn on full verification. This option can be deprecated in the future')
+      return true
+    }
+
     const payload = toJwtPayload(tokenPayload)
 
     if (isSet(payload.email) ^ isSet(payload.silkeySignature)) {
@@ -84,11 +114,6 @@ export const verifySilkeySignature = (tokenPayload, silkeyPublicKey) => {
 
     if (!isSet(payload.email) && !isSet(payload.silkeySignature)) {
       return null
-    }
-
-    if (isEmpty(silkeyPublicKey)) {
-      console.warn('Verification failed, missing silkeyPublicKey')
-      return false
     }
 
     const signer = ethers.utils.verifyMessage(payload.messageToSignBySilkey(), payload.silkeySignature)
