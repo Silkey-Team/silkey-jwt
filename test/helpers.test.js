@@ -11,5 +11,6 @@ describe('timestampToBuffer()', () => {
     expect(intToBuffer(31).toString('hex')).to.eq('1f')
     expect(intToBuffer(256).toString('hex')).to.eq('0100')
     expect(intToBuffer(1604499020).toString('hex')).to.eq('5fa2b64c')
+    expect(intToBuffer('1604499020').toString('hex')).to.eq('5fa2b64c')
   })
 })

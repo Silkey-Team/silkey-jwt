@@ -12,11 +12,12 @@ SDK package for integrate with Silkey standard of Decentralised SSO.
 
 Redirect user to `sso.silkey.io/signin` with parameters:
 
-| Parameter     | Required  | Type | Desc  |
-| ------------- |:---------:| ----- |
+| Parameter     | Required  | Type | Desc |
+| ------------- |:---------:| ----- | ----- |
 | signature     | yes | string | Domain owner signature |
-| redirectUrl   | yes | string | Where to redirect user with token after sign in |
 | sigTimestamp  | yes | number | Timestamp of signature  |
+| redirectUrl   | yes | string | Where to redirect user with token after sign in |
+| cancelUrl     | yes | string | Where to redirect user on error |
 | refId         | no  | string | It will be return with user token, you may use it to identify request |
 | scope         | no  | string | Scope of data to return in a token payload: `id` (default) returns only user address, `email` returns address + email |
 
