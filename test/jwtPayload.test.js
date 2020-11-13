@@ -5,7 +5,7 @@ const { expect, assert } = chai
 
 const currentTimestamp = Math.round(Date.now() / 1000)
 
-const address = '0xDBF03b99664deb3C73045ac8933A6db89fefFf5F'
+const address = `0x${'1'.repeat(40)}`
 
 describe('JwtPayload()', () => {
   it('creates JwtPayload object', () => {
@@ -14,6 +14,45 @@ describe('JwtPayload()', () => {
     expect(payload).to.be.instanceOf(JwtPayload)
     expect(payload.userSignature).not.to.be.undefined
     expect(payload.silkeySignature).not.to.be.undefined
+  })
+
+  it('setScope() sets in order', () => {
+    const payload = new JwtPayload()
+      .setScope('c')
+      .setScope('b')
+      .setScope('a')
+
+    expect(payload.scope).to.eq('a,b,c')
+  })
+
+  it('messageToSignByUser() for empty object', () => {
+    const payload = new JwtPayload()
+    expect(payload.messageToSignByUser()).to.eq('61646472657373726566496473636f7065757365725369676e617475726554696d657374616d70')
+  })
+
+  it('messageToSignByUser()', () => {
+    const payload = new JwtPayload()
+      .setRefId('0xabc')
+      .setEmail('a@b.c')
+      .setScope('email')
+      .setAddress(address)
+      .setUserSignature(`0x${'1'.repeat(130)}`, 1234567890)
+
+    expect(payload.messageToSignByUser()).to.eq('6164647265737311111111111111111111111111111111111111117265664964307861626373636f7065656d61696c757365725369676e617475726554696d657374616d70499602d2')
+  })
+
+  it('messageToSignBySilkey() for empty data', () => {
+    const payload = new JwtPayload()
+    expect(payload.messageToSignBySilkey()).to.eq('')
+  })
+
+  it('messageToSignBySilkey() for set data', () => {
+    const payload = new JwtPayload()
+      .setEmail('a@b.c')
+
+    const msg = payload.messageToSignBySilkey()
+    expect(msg.length).to.eq(18)
+    expect(msg.slice(0, -8)).to.eq('6140622e63')
   })
 
   it('setUserSignature()', () => {
