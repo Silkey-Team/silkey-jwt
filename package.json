@@ -1,6 +1,6 @@
 {
   "name": "@silkey/sdk",
-  "version": "0.2.10",
+  "version": "0.2.18",
   "description": "Package to generates and validates Silkey JWT",
   "main": "src/index.js",
   "type": "module",
@@ -10,6 +10,7 @@
   "scripts": {
     "lint": "eslint --fix src/ test/",
     "test": "mocha test",
+    "test:one": "mocha ",
     "doc": "jsdoc2md src/sso.js > DOCS.md",
     "pre-push": "npm run lint && npm run doc && npm run test"
   },
@@ -38,7 +39,8 @@
     "eslint-plugin-standard": "^4.0.1",
     "husky": "^4.3.0",
     "jsdoc-to-markdown": "^6.0.1",
-    "mocha": "^8.1.3"
+    "mocha": "^8.1.3",
+    "dotenv": "^8.2.0"
   },
   "husky": {
     "hooks": {

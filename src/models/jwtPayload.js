@@ -2,7 +2,14 @@
  * @module JwtPayloadModel
  */
 
-import { intToBuffer, isEmpty, isEthereumAddress, isSignature } from '../utils/helpers.js'
+import {
+  currentTimestamp,
+  intToBuffer,
+  isEmpty,
+  isEthereumAddress,
+  isSignature,
+  remove0x
+} from '../utils/helpers.js'
 
 export const SCOPE_DIVIDER = ','
 
@@ -11,11 +18,13 @@ export const SCOPE_DIVIDER = ','
  */
 function JwtPayloadObj () {
   this.scope = ''
-  this.silkeySignature = null
-  this.silkeySignatureTimestamp = null
-  this.userSignature = null
-  this.userSignatureTimestamp = null
-  this.address = null
+  this.address = ''
+  this.refId = ''
+  this.silkeySignature = ''
+  this.silkeySignatureTimestamp = ''
+  this.userSignature = ''
+  this.userSignatureTimestamp = ''
+  this.userSignatureTimestamp = ''
 }
 
 JwtPayloadObj.prototype.setScope = function (scope) {
@@ -33,7 +42,7 @@ JwtPayloadObj.prototype.setScope = function (scope) {
   str.split(SCOPE_DIVIDER).filter(k => !isEmpty(k)).forEach(k => {
     map[k] = k
   })
-  this.scope = Object.keys(map).join(SCOPE_DIVIDER)
+  this.scope = Object.keys(map).sort().join(SCOPE_DIVIDER)
 
   return this
 }
@@ -105,17 +114,20 @@ JwtPayloadObj.prototype.setSilkeySignature = function (sig, timestamp) {
  * @returns {string}
  */
 JwtPayloadObj.prototype.messageToSignByUser = function () {
-  const keys = Object.keys(this)
-    .filter(k => !['silkeySignature', 'silkeySignatureTimestamp', 'userSignature', 'email', 'iat'].includes(k))
-    .sort()
+  if (!isEmpty(this.address) && isEmpty(this.userSignatureTimestamp)) {
+    this.userSignatureTimestamp = currentTimestamp()
+  }
 
-  const items = []
-
-  keys.forEach(k => {
-    items.push(this[k])
-  })
-
-  return items.join(':')
+  return Buffer.concat([
+    Buffer.from('address'),
+    Buffer.from(remove0x(this.address.toLowerCase()), 'hex'),
+    Buffer.from('refId'),
+    Buffer.from(this.refId.toString()),
+    Buffer.from('scope'),
+    Buffer.from(this.scope),
+    Buffer.from('userSignatureTimestamp'),
+    intToBuffer(this.userSignatureTimestamp)
+  ]).toString('hex')
 }
 
 /**
@@ -127,7 +139,11 @@ JwtPayloadObj.prototype.messageToSignByUser = function () {
  */
 JwtPayloadObj.prototype.messageToSignBySilkey = function () {
   if (isEmpty(this.email)) {
-    return null
+    return ''
+  }
+
+  if (isEmpty(this.silkeySignatureTimestamp)) {
+    this.silkeySignatureTimestamp = currentTimestamp()
   }
 
   return Buffer.concat([
@@ -146,10 +162,10 @@ JwtPayloadObj.prototype.validate = function () {
   }
 
   if (isEmpty(this.userSignatureTimestamp)) {
-    throw new Error(`userSignatureTimestamp is invalid: ${this.userSignatureTimestamp}`)
+    throw new Error('userSignatureTimestamp is empty')
   }
 
-  if (this.scope === 'id') {
+  if (isEmpty(this.scope) || this.scope === 'id') {
     return this
   }
 

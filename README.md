@@ -6,6 +6,11 @@ SDK package for integrate with Silkey standard of Decentralised SSO.
 
 [See list of all available methods](./DOCS.md).
 
+## Smart Contracts
+
+### registryAddress
+- Kovan: '0x3acd1d20134A2B004d2fEbd685501d5fFBe419d5'
+
 ## Usage
 
 ### Sign In With Silkey
@@ -30,29 +35,50 @@ When user back to you page with JWT token, validate it and login user.
 npm i --save silkey-sdk
 ```
 
-### Draft integration description
+### Integration
+
+#### on signin page
+
+```    
+    const callerParams = {
+      // make sure you support both GET and POST redirection,
+      redirectUrl: 'https://your-registered-domain/redirect-path', 
+      cancelUrl: 'https://your-registered-domain/cancel',
+      refId: 'any',
+      scope: 'email'
+    }
+    
+    const requestParams = await silkeySdk.generateSSORequestParams(callerPrivateKey, callerParams)
+
+    // redirect user to provided silkey URL with all params from `requestParams` as query string
+```
+
+#### on callback page 
+
+##### default simple version
 
 ```
-# on signin page
+    // token - get `token` from request parameters
 
-import silkeySdk from 'sdk'
+    const jwtPayload = silkeySdk.tokenPayloadVerifier(token)
 
-    const requestParams = silkeySdk.generateSSORequestParams(privateKey, {
-      redirectUrl: 'https://domain/callback', // make sure you support both GET and POST redirection,
-      scope: 'email',
-      refId: 'any-data-that-will-be-returned-to-you',
-      cancelUrl: 'https://domain/cancel',
-      sigTimestamp: Math.round(Date.now() / 1000)
-    })
+    if (jwtPayload === null) {
+      // authorization failed
+    } else {
+      const {address, email, refId} = jwtPayload
+      // address - use this as ID of the user
 
-    // redirect user to provided silkey URL with requestParams as query string
+      // you are ready to go...
+    }
+```
 
-# on callback page
+##### version with additional silkey key check (recommended)
 
-    import silkeySdk from 'sdk'
+- providerUri: web3 provider uri, we recommend using infura.io as a provider
+- registryAddress: Silkey smart contract registry address, see [#registryAddress](#registryAddress) for available addresses
 
-    // infuraId|provider - you need to have infura.io account or you can use any other web3 provider
-    const {token, silkeyPublicKey} = silkeySdk.fetchSSOCallbackData(infuraId|provider)
+```
+    const silkeyPublicKey = await fetchSilkeyPublicKey(providerUri, registryAddress)
 
     const jwtPayload = silkeySdk.tokenPayloadVerifier(token, silkeyPublicKey)
 

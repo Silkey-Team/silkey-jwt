@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - jsdocs
 - new model: `JwtPayload`
 - support for scope:email
+- method to fetch silkey public key
 
 ### Changed
 - Change package name from `silkey-jwt` to `silkey-sdk`

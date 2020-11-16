@@ -1,6 +1,20 @@
 import * as Models from './models/index.js'
 import * as utils from './utils/helpers.js'
+import * as blockchain from './contracts/index.js'
 
-import { generateSSORequestParams, tokenPayloadVerifier, messageToSign } from './sso.js'
+import {
+  fetchSilkeyPublicKey,
+  generateSSORequestParams,
+  messageToSign,
+  tokenPayloadVerifier
+} from './sso.js'
 
-export default { Models, utils, generateSSORequestParams, tokenPayloadVerifier, messageToSign }
+export default {
+  Models,
+  utils,
+  blockchain,
+  generateSSORequestParams,
+  tokenPayloadVerifier,
+  messageToSign,
+  fetchSilkeyPublicKey
+}

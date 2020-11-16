@@ -1,13 +1,14 @@
+import dotenv from 'dotenv'
 import chai from 'chai'
-import { generateSSORequestParams, messageToSign } from '../src/sso.js'
+
+import { privateKey } from './keys.js'
+import { fetchSilkeyPublicKey, generateSSORequestParams, messageToSign } from '../src/sso.js'
+
+dotenv.config()
 
 const { expect } = chai
 
 describe('sso.js', () => {
-  // address: 0xDBF03b99664deb3C73045ac8933A6db89fefFf5F
-  // this is random PK, please do not use it for anything else than this test
-  const privateKey = '0x2c06e0037dacc4a831049ce0770f5f6f788827659a5842ed96d34c0631d5f6de'
-
   const t = Math.round(Date.now() / 1000)
 
   describe('messageToSign()', () => {
@@ -18,8 +19,8 @@ describe('sso.js', () => {
 
     it('generates message with data', () => {
       const m = messageToSign({
-        a: 1,
-        b: 2
+        b: 2,
+        a: 1
       })
       expect(m).to.eq('a=1::b=2')
     })
@@ -95,6 +96,14 @@ describe('sso.js', () => {
       console.log(res1)
 
       expect(res1.signature).to.eq(res2.signature)
+    })
+  })
+
+  describe('fetchSilkeyPublicKey()', () => {
+    it('expect to fetch silkey public key', async () => {
+      const m = await fetchSilkeyPublicKey(process.env.PROVIDER_URI, '0x3acd1d20134A2B004d2fEbd685501d5fFBe419d5')
+      expect(m).not.to.eq('0x0000000000000000000000000000000000000000')
+      expect(m.length).to.eq(42)
     })
   })
 })
