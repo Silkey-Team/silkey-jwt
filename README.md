@@ -40,9 +40,17 @@ npm i --save silkey-sdk
 
 #### Needed Preperations:
 
-1.  Create a ethereum wallet for the program, save the private key
-2.  Save the application in Apollo with the generated wallet, visit https://apollo.silkey.io to do this
-3.  Store the private key in the .env variables for the application
+1.  Generate an ethereum wallet for the application, this wallet will be linked to the web domain of the application
+2.  Authenticate the domain of the application in Apollo with the generated wallet:
+
+- Visit https://apollo.silkey.io
+- Click on Register Domain and enter domain
+- Enter the address of the wallet
+- Generate a challenge and add it into the DNS TXT record of the domain
+- Verify the domain with DNS TXT records challenge
+- Add logo url that will be displayed when a user is loging in using silkey
+
+3.  Store the private key in a secure way inside the application, it will be used to generate the requestUrl
 
 #### On Signin Page
 
@@ -50,8 +58,8 @@ npm i --save silkey-sdk
 import silkeySdk from "@silkey/sdk";
 
 // The needed data varaibles are:
-// redirectUrl: Where the user is redirected after auth
-// cancelUrl: Where the user is redirected if they cancel auth
+// redirectUrl: Where the user is redirected after auth, this Url need to handle GET and POST requests as that is how the token is returned from Athena
+// cancelUrl: Where the user is redirected if they cancel authentication
 // scope: "email" or "id" email if you want access to the users email, otherwise id
 // refId: (optional) This data will be returned to the program after authentication, and can be used to track previous actions before signup
 // ssoTimestamp: (Optional) Time when params were generated, will be automatically generated if not present
@@ -81,12 +89,13 @@ Object.entries(requestParams).forEach(([key, param]) => {
 ```javascript
 import silkeySdk from "@silkey/sdk";
 
-// providerUri - A web3 provider URI. ie: 'https://infura.io/v3/:infuraId' register to infura.io to get infuraId
+// providerUri: A web3 provider URI. ie: 'https://infura.io/v3/:infuraId' register at infura.io to get infuraId
 // registryAddress: Address of silkey smart contract registry, see list of addresses in the registryAddress section of README.md
 const silkeyPublicKey = await silkeySdk.fetchSilkeyPublicKey(providerUri, registryAddress);
 
-const token = queryStringGetter("token");
+// token: The token returned by Athena
 
+// Using silkeyPublicKey is optional but recomended
 const jwtPayload = silkeySdk.tokenPayloadVerifier(token, silkeyPublicKey);
 
 if (jwtPayload === null) {
