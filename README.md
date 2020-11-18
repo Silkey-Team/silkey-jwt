@@ -38,17 +38,39 @@ npm i --save silkey-sdk
 
 ### Silkey Integration Guide
 
+#### Information About Sandbox vs. Production
+
+There are two versions of Athena (which you redirect to and authenticates the user) and Apollo (which registers the domain name of your application).
+The version of Apollo that is used is determined by the Athena version, and isn't specified by the developer.
+One uses an ethereum test network, where the ether has no monetary value, and the other is on the main ethereum network.
+
+When in development, the test version of Apollo should be used.
+
+The Sandbox Url: https://apollo-staging.silkey.io
+The Production Url: https://apollo.silkey.io
+
+A very small amount of ether is used to verify that the domain is registered.
+To obtain free ether on the Rinkeby test network visit https://faucet.rinkeby.io/
+
 #### Needed Preperations:
 
 1.  Generate an ethereum wallet for the application, this wallet will be linked to the web domain of the application
+
+- Visit https://metamask.io
+- Download and add the extension to your browser
+- Create an account for the application
+- Click on account details then export private key to view and write down the private key
+
 2.  Authenticate the domain of the application in Apollo with the generated wallet:
 
-- Visit https://apollo.silkey.io
-- Click on Register Domain and enter domain
-- Enter the address of the wallet
+- Visit the propper Apollo url (see above)
+- Login with metamask
+- Click on Register Domain and enter domain of your application
+- Click "Connect Existing Wallet" to use the metamask account
 - Generate a challenge and add it into the DNS TXT record of the domain
 - Verify the domain with DNS TXT records challenge
 - Add logo url that will be displayed when a user is loging in using silkey
+- Send a transaction which will save the registration
 
 3.  Store the private key in a secure way inside the application, it will be used to generate the requestUrl
 
