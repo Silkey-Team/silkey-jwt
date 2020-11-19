@@ -2,7 +2,7 @@ import * as ethersjs from 'ethers'
 import registryAbi from './abi/registry.abi.js'
 import { strToBytes32, isEmpty } from '../utils/helpers.js'
 
-const { ethers } = ethersjs.default || ethersjs
+const { ethers } = ethersjs.default ? ethersjs.default : ethersjs
 
 export const createProvider = providerUri => {
   if (isEmpty(providerUri)) throw Error('Empty web3 provider uri')

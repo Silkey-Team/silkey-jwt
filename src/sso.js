@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken'
 import { toJwtPayload } from './models/index.js'
 import { createProvider, Registry } from './contracts/index.js'
 
-const { ethers } = ethersjs.default || ethersjs
+const { ethers } = ethersjs.default ? ethersjs.default : ethersjs
 
 let wallet
 
