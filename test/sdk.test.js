@@ -32,8 +32,8 @@ describe('sso.js', () => {
     })
 
     it('compare sig from other SDK', async () => {
-      const message = 'cancelUrl=::redirectUrl=::refId=::scope=::sigTimestamp=1602151787'
-      const otherSdkSig = '3f14a50ae39d1b747b51d657fdd1ff3f1b623d2d711dce351a11e0db3d1cbf5500954fab4dbe1107d9ab8dfc1120492397745457c282ca1db4af2fcecac4f8941c'
+      const message = 'cancelUrl=::redirectUrl=::refId=::scope=::ssoTimestamp=1602151787'
+      const otherSdkSig = 'a1164b34b42940a98b5f23c5125f0c4d00957836b988f8a7a52e755b63e0b57912f7846cab32e8cf67b26db34fe2b7fa8e2504e0a75df9468c580aceb91252b11b'
 
       expect(await ethers.utils.verifyMessage(message, prepend0x(otherSdkSig))).to.eq(publicKey)
     })

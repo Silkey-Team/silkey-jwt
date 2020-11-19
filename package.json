@@ -1,6 +1,6 @@
 {
   "name": "@silkey/sdk",
-  "version": "0.2.18",
+  "version": "0.2.20",
   "description": "Package to generates and validates Silkey JWT",
   "main": "src/index.js",
   "type": "module",

@@ -20,7 +20,7 @@ Redirect user to `sso.silkey.io/signin` with parameters:
 | Parameter     | Required  | Type | Desc |
 | ------------- |:---------:| ----- | ----- |
 | signature     | yes | string | Domain owner signature |
-| sigTimestamp  | yes | number | Timestamp of signature  |
+| ssoTimestamp  | yes | number | Time of signing SSO request |
 | redirectUrl   | yes | string | Where to redirect user with token after sign in |
 | cancelUrl     | yes | string | Where to redirect user on error |
 | refId         | no  | string | It will be return with user token, you may use it to identify request |

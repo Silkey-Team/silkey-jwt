@@ -38,17 +38,17 @@ export const messageToSign = (data = {}) => {
  * @async
  * @method
  * @param privateKey {string} this should be private key of domain owner
- * @param data {{redirectUrl, cancelUrl, refId, scope, sigTimestamp}} Object with data: {redirectUrl*, cancelUrl*, refId*, scope, sigTimestamp*}
+ * @param data {{redirectUrl, cancelUrl, refId, scope, ssoTimestamp}} Object with data: {redirectUrl*, cancelUrl*, refId, scope, ssoTimestamp*}
  *  marked with * are required by Silkey SSO
- * @returns {{signature, sigTimestamp, redirectUrl, refId, scope}}
+ * @returns {{signature, ssoTimestamp, redirectUrl, refId, scope}}
  * @example
- * // returns {signature, sigTimestamp, redirectUrl, refId, scope}
+ * // returns {signature, ssoTimestamp, redirectUrl, refId, scope}
  * await generateSSORequestParams(domainOwnerPrivateKey, {redirectUrl: 'http://silkey.io', refId: 1});
  */
 export const generateSSORequestParams = async (privateKey, data = {}) => {
   const redirectUrl = data.redirectUrl || ''
   const cancelUrl = data.cancelUrl || ''
-  const sigTimestamp = data.sigTimestamp || currentTimestamp()
+  const ssoTimestamp = data.ssoTimestamp || currentTimestamp()
   const refId = data.refId || ''
   const scope = data.scope || ''
 
@@ -57,7 +57,7 @@ export const generateSSORequestParams = async (privateKey, data = {}) => {
   const message = messageToSign({
     redirectUrl,
     cancelUrl,
-    sigTimestamp,
+    ssoTimestamp,
     refId,
     scope
   })
@@ -66,8 +66,7 @@ export const generateSSORequestParams = async (privateKey, data = {}) => {
 
   return {
     signature,
-    // message,
-    sigTimestamp,
+    ssoTimestamp,
     redirectUrl,
     cancelUrl,
     refId,
