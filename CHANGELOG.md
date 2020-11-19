@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - change naming convention from `timestamp` to `sigTimestamp`
 - change timestamp name for SSO param to `ssoTimestamp`
 
+### Fixed
+- import ethers lib in a way that is supported by both: react and nodejs app
+
 ## [0.2.0] - 2020-11-04
 ### Added
 - eslint

@@ -1,6 +1,6 @@
 {
   "name": "@silkey/sdk",
-  "version": "0.2.20",
+  "version": "0.2.21",
   "description": "Package to generates and validates Silkey JWT",
   "main": "src/index.js",
   "type": "module",
@@ -25,7 +25,7 @@
   },
   "homepage": "https://silkey.io",
   "dependencies": {
-    "ethers": "~5.0.15",
+    "ethers": "~5.0.20",
     "int64-buffer": "^1.0.0",
     "jsonwebtoken": "~8.5.1"
   },

@@ -2,13 +2,13 @@
  * @module SilkeySDK
  */
 
-import ethersjs from 'ethers'
+import * as ethersjs from 'ethers'
 import { currentTimestamp, isEmpty, isEthereumAddress } from './utils/helpers.js'
 import jwt from 'jsonwebtoken'
 import { toJwtPayload } from './models/index.js'
 import { createProvider, Registry } from './contracts/index.js'
 
-const { ethers } = ethersjs
+const { ethers } = ethersjs.default || ethersjs
 
 let wallet
 
