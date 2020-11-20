@@ -80,7 +80,7 @@ To obtain free ether on the Rinkeby test network visit https://faucet.rinkeby.io
 import silkeySdk from "@silkey/sdk";
 
 // The needed data varaibles are:
-// redirectUrl: Where the user is redirected after auth, this Url need to handle GET and POST requests as that is how the token is returned from Athena
+// redirectUrl: Where the user is redirected after auth
 // cancelUrl: Where the user is redirected if they cancel authentication
 // scope: "email" or "id" email if you want access to the users email, otherwise id
 // refId: (optional) This data will be returned to the program after authentication, and can be used to track previous actions before signup
@@ -116,6 +116,7 @@ import silkeySdk from "@silkey/sdk";
 const silkeyPublicKey = await silkeySdk.fetchSilkeyPublicKey(providerUri, registryAddress);
 
 // token: The token returned by Athena
+const token = new URL(window.location).searchParams.get("token");
 
 // Using silkeyPublicKey is optional but recomended
 const jwtPayload = silkeySdk.tokenPayloadVerifier(token, silkeyPublicKey);
