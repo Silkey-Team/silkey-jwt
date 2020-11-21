@@ -2,16 +2,13 @@
  * @module SilkeySDK
  */
 
-import * as ethersjs from 'ethers'
+import ethersjs from './import-ethers/index.js'
 import { currentTimestamp, isEmpty, isEthereumAddress } from './utils/helpers.js'
 import jwt from 'jsonwebtoken'
 import { toJwtPayload } from './models/index.js'
 import { createProvider, Registry } from './contracts/index.js'
 
-const { ethers } = ethersjs.default ? ethersjs.default : ethersjs
-
-let wallet
-
+const { ethers } = ethersjs
 const parser = v => isEmpty(v) ? '' : v
 
 /**
@@ -52,7 +49,7 @@ export const generateSSORequestParams = async (privateKey, data = {}) => {
   const refId = data.refId || ''
   const scope = data.scope || ''
 
-  wallet = new ethers.Wallet(privateKey)
+  const wallet = new ethers.Wallet(privateKey)
 
   const message = messageToSign({
     redirectUrl,
