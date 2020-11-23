@@ -36,17 +36,17 @@ describe('sso.js', () => {
     })
 
     it('generates signature for SSO request', async () => {
-      const { signature, ssoTimestamp } = await generateSSORequestParams(privateKey, { ssoTimestamp: 1602151787 })
+      const { signature, ssoTimestamp } = await generateSSORequestParams(privateKey, { ssoTimestamp: 1602151787, redirectUrl: 'http', cancelUrl: 'http' })
 
-      expect(signature).to.eq('0x3de4cc906aa6aed666b0ab0acd81d79437c0229f8b32a5f94173c7e25f1152571e576c516bbaa551b35df366e41bbd4bd2cfb76564ea52d2aa3fe8e4006d999b1c')
+      expect(signature).to.eq('0x225883a83c013f87f69c5ec45c1e1644562a261c194b2752458b6001d282dbbf60e95f5f335e84cbfc0ef8cf58d15d77cf73d124bc0c1791f0ab61a0b7e48aa31b')
       expect(ssoTimestamp).to.eq(1602151787)
     })
 
     it('sets timestamp when not provided', async () => {
       const awaits = [
-        generateSSORequestParams(privateKey),
-        generateSSORequestParams(privateKey, { ssoTimestamp: null }),
-        generateSSORequestParams(privateKey, { ssoTimestamp: '' })
+        generateSSORequestParams(privateKey, { redirectUrl: 'http', cancelUrl: 'http' }),
+        generateSSORequestParams(privateKey, { ssoTimestamp: null, redirectUrl: 'http', cancelUrl: 'http' }),
+        generateSSORequestParams(privateKey, { ssoTimestamp: '', redirectUrl: 'http', cancelUrl: 'http' })
       ]
 
       const results = await Promise.all(awaits)
@@ -59,19 +59,22 @@ describe('sso.js', () => {
     it('generates same signature for null/empty data', async () => {
       const { signature } = await generateSSORequestParams(privateKey, {
         timestamp: 1,
-        redirectUrl: '',
+        redirectUrl: 'http',
+        cancelUrl: 'http',
         refId: '',
         scope: ''
       })
       const data2 = await generateSSORequestParams(privateKey, {
         timestamp: 1,
-        redirectUrl: null,
+        redirectUrl: 'http',
+        cancelUrl: 'http',
         refId: null,
         scope: null
       })
       const data3 = await generateSSORequestParams(privateKey, {
         timestamp: 1,
-        redirectUrl: undefined,
+        redirectUrl: 'http',
+        cancelUrl: 'http',
         refId: undefined,
         scope: undefined
       })
@@ -101,7 +104,7 @@ describe('sso.js', () => {
 
   describe('fetchSilkeyPublicKey()', () => {
     it('expect to fetch silkey public key', async () => {
-      const m = await fetchSilkeyPublicKey(process.env.PROVIDER_URI, '0x3acd1d20134A2B004d2fEbd685501d5fFBe419d5')
+      const m = await fetchSilkeyPublicKey(process.env.PROVIDER_URI, '0xcEf09Bdb5d73055bc52C55E81F1138f48bcc0eCc')
       expect(m).not.to.eq('0x0000000000000000000000000000000000000000')
       expect(m.length).to.eq(42)
     })

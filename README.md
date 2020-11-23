@@ -22,6 +22,7 @@ Redirect user to `sso.silkey.io/signin` with parameters:
 | signature     | yes | string | Domain owner signature |
 | ssoTimestamp  | yes | number | Time of signing SSO request |
 | redirectUrl   | yes | string | Where to redirect user with token after sign in |
+| redirectMethod   | no | GET/POST | How to redirect user after sign in, default is POST |
 | cancelUrl     | yes | string | Where to redirect user on error |
 | refId         | no  | string | It will be return with user token, you may use it to identify request |
 | scope         | no  | string | Scope of data to return in a token payload: `id` (default) returns only user address, `email` returns address + email |
