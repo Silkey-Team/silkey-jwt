@@ -8,10 +8,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - option for not checking silkey signature on token verification
 - add `userSignatureTimestamp` to jwtPayload model
+- support for `redirectMethod` param
 
 ### Changed
 - change naming convention from `timestamp` to `sigTimestamp`
 - change timestamp name for SSO param to `ssoTimestamp`
+- `generateSSORequestParams` throws when `redirectUrl` or `cancelUrl` empty
 
 ### Fixed
 - import ethers lib in a way that is supported by both: react and nodejs app
