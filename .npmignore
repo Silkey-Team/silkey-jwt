@@ -1,3 +1,4 @@
 test/
 .idea/
-example.env
+.env*
+.eslintrc.json

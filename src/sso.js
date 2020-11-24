@@ -2,16 +2,13 @@
  * @module SilkeySDK
  */
 
-import ethersjs from 'ethers'
+import ethersjs from './import-ethers/index.js'
 import { currentTimestamp, isEmpty, isEthereumAddress } from './utils/helpers.js'
 import jwt from 'jsonwebtoken'
 import { toJwtPayload } from './models/index.js'
 import { createProvider, Registry } from './contracts/index.js'
 
 const { ethers } = ethersjs
-
-let wallet
-
 const parser = v => isEmpty(v) ? '' : v
 
 /**
@@ -38,40 +35,44 @@ export const messageToSign = (data = {}) => {
  * @async
  * @method
  * @param privateKey {string} this should be private key of domain owner
- * @param data {{redirectUrl, cancelUrl, refId, scope, sigTimestamp}} Object with data: {redirectUrl*, cancelUrl*, refId*, scope, sigTimestamp*}
+ * @param data {{redirectUrl, redirectMethod, cancelUrl, refId, scope, ssoTimestamp}} Object with data: {redirectUrl*, redirectMethod, cancelUrl*, refId, scope, ssoTimestamp*}
  *  marked with * are required by Silkey SSO
- * @returns {{signature, sigTimestamp, redirectUrl, refId, scope}}
+ * @returns {{signature, ssoTimestamp, redirectUrl, refId, scope}}
  * @example
- * // returns {signature, sigTimestamp, redirectUrl, refId, scope}
+ * // returns {signature, ssoTimestamp, redirectUrl, refId, scope, redirectMethod}
  * await generateSSORequestParams(domainOwnerPrivateKey, {redirectUrl: 'http://silkey.io', refId: 1});
  */
 export const generateSSORequestParams = async (privateKey, data = {}) => {
-  const redirectUrl = data.redirectUrl || ''
-  const cancelUrl = data.cancelUrl || ''
-  const sigTimestamp = data.sigTimestamp || currentTimestamp()
-  const refId = data.refId || ''
-  const scope = data.scope || ''
+  if (isEmpty(data.redirectUrl)) {
+    throw Error('`data.redirectUrl` is required')
+  }
 
-  wallet = new ethers.Wallet(privateKey)
+  if (isEmpty(data.cancelUrl)) {
+    throw Error('`data.redirectUrl` is required')
+  }
 
-  const message = messageToSign({
-    redirectUrl,
-    cancelUrl,
-    sigTimestamp,
-    refId,
-    scope
+  const { redirectUrl, cancelUrl, redirectMethod, refId } = data
+  const ssoTimestamp = data.ssoTimestamp || currentTimestamp()
+  const scope = data.scope || 'id'
+
+  const wallet = new ethers.Wallet(privateKey)
+
+  const dataToSign = {}
+
+  const items = { redirectUrl, redirectMethod, cancelUrl, ssoTimestamp, refId, scope }
+
+  Object.keys(items).forEach(k => {
+    if (!isEmpty(items[k])) {
+      dataToSign[k] = items[k]
+    }
   })
 
+  const message = messageToSign(dataToSign)
   const signature = await wallet.signMessage(message)
 
   return {
-    signature,
-    // message,
-    sigTimestamp,
-    redirectUrl,
-    cancelUrl,
-    refId,
-    scope
+    ...dataToSign,
+    signature
   }
 }
 
