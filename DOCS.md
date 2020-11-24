@@ -62,11 +62,11 @@ Generates all needed parameters (including signature) for requesting Silkey SSO
 | Param | Type | Description |
 | --- | --- | --- |
 | privateKey | <code>string</code> | this should be private key of domain owner |
-| data | <code>Object</code> | Object with data: {redirectUrl*, cancelUrl*, refId, scope, ssoTimestamp*}  marked with * are required by Silkey SSO |
+| data | <code>Object</code> | Object with data: {redirectUrl*, redirectMethod, cancelUrl*, refId, scope, ssoTimestamp*}  marked with * are required by Silkey SSO |
 
 **Example**  
 ```js
-// returns {signature, ssoTimestamp, redirectUrl, refId, scope}
+// returns {signature, ssoTimestamp, redirectUrl, refId, scope, redirectMethod}
 await generateSSORequestParams(domainOwnerPrivateKey, {redirectUrl: 'http://silkey.io', refId: 1});
 ```
 <a name="module_SilkeySDK.tokenPayloadVerifier"></a>

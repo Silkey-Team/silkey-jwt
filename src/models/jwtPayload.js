@@ -20,10 +20,10 @@ function JwtPayloadObj () {
   this.scope = ''
   this.address = ''
   this.refId = ''
+  this.email = ''
   this.silkeySignature = ''
   this.silkeySignatureTimestamp = ''
   this.userSignature = ''
-  this.userSignatureTimestamp = ''
   this.userSignatureTimestamp = ''
 }
 
