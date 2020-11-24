@@ -1,15 +1,13 @@
 import chai from 'chai'
 import ethersjs from 'ethers'
 
+import { publicKey } from './keys.js'
+import { invalidToken, validScopeEmailToken, validScopeIdToken } from './tokens.js'
 import { toJwtPayload } from '../src/models/jwtPayload.js'
-import { tokenPayloadVerifier, verifyUserSignature } from '../src/sso.js'
+import { tokenPayloadVerifier, verifySilkeySignature, verifyUserSignature } from '../src/sso.js'
 
 const { expect } = chai
 const { ethers } = ethersjs
-
-const validScopeIdToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6ImlkIiwic2lsa2V5U2lnbmF0dXJlIjpudWxsLCJzaWxrZXlTaWduYXR1cmVUaW1lc3RhbXAiOm51bGwsInVzZXJTaWduYXR1cmUiOiIweDcyMDM0M2I2OWY1YWZjNTY3ZjIwNmQ0YjBiMDJhMWQ3MjQ5ODUxNjlhYzk2YTIzMTY2NjUxODc2YjQwY2M1MzEyMWI4MmVkNzNmMTk1Nzc2MmI3NjI4ZjcwNGQ0NWRlZjBmYmQ2MmI5YzlkOTM5ZDcwM2YwM2YwZDQ4ZTJlOTZjMWMiLCJhZGRyZXNzIjoiMHgzRjE1OGY2YzczNDlDRDY5NzMyM2I4NDNkQWJiMGE3ODRkRDk4OTE2IiwidGltZXN0YW1wIjoxNjA0NTEzMTU5LCJpYXQiOjE2MDQ1MTMxNTl9.iccASnCA0XSun9c_Jxr9mNrrUMrSJ-2NtOsVVGpogtI'
-const validScopeEmailToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6ImVtYWlsIiwic2lsa2V5U2lnbmF0dXJlIjoiMHhkM2U1MTdlZjc4NDk4ZDM5ZTUyNzdkMGE5NzQzZjQ4YmRhZTY2ZmIzY2Y2MTJlYTkzZDU0NmY5ZWJkMmM3YmE1NzMyZDI0OWFmZTNlNDRmZjFmNTNlZGJkODQzODUzYzRlNmYwY2UxYjYyYjJmODcyMzQ1M2M2MzUxYjllMjU3ZjFiIiwic2lsa2V5U2lnbmF0dXJlVGltZXN0YW1wIjoxNjA0NTEzMTU5LCJ1c2VyU2lnbmF0dXJlIjoiMHhiYzc5MmYyNTA4ZDlmOGRhMDhmZmIyNDM3Nzk5Y2NkZWNiMGVjNmI1YzAzNTAwMjc3ZThmZmZkNDczMTg3MDdhNzk5YjU1MTAzYjFjZmU0Yjg1ZGFlNzZmMDEwZDI2YjEwMTQzZTNkMDQ4MTc2ZWY2YzFjNGE1MGI2Mjg1MmU3YTFjIiwiYWRkcmVzcyI6IjB4N2VCOGFGRTQzNzc5NDQ2Njg2NDAwNTYzOGQyNzg5NmRBOEQ0Q2Y3YiIsImVtYWlsIjoiYWxpYXNJZEBwcml2YXRlcmVsYXkiLCJ0aW1lc3RhbXAiOjE2MDQ1MTMxNTksImlhdCI6MTYwNDUxMzE1OX0.Qc4sZluSz-by3dbmUvxcvHrGZ4QwHqey__6685C6pS0'
-const invalidToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjB4NjNmNUY0YjUzNjE3MTBiYzViMThBZTYyZGJjQzRkRTFiNjY0RjlCNEBwcml2YXRlcmVsYXkuc2lsa2V5LmlvIiwiYWRkcmVzcyI6IjB4RTIxNDA3ZDc4Q0FkQzQzNDczNTZGMjhiM0U2Mjc1NDM5MzM5RDA4NCIsInNpZ25hdHVyZSI6eyJyIjoiMHgyNmUxZGM0MzA4ZTViMDRiNGVhZWVlNzI0MWYwMjgzOTM0ZTgzYmE1OTMzYjM5NThkOTIyYmRiNmRkOTgzOTc3IiwicyI6IjB4MmMyOGQ2YmZmZWMxYThjOTFlNDFlODJjMWJjMzBmYzZkMTNjYzljNDk1Y2ZhNzQ3MjUzNzQ4OTVlMzhiZTdmNSIsIl92cyI6IjB4YWMyOGQ2YmZmZWMxYThjOTFlNDFlODJjMWJjMzBmYzZkMTNjYzljNDk1Y2ZhNzQ3MjUzNzQ4OTVlMzhiZTdmNSIsInJlY292ZXJ5UGFyYW0iOjEsInYiOjI4fSwiaWF0IjoxNjAyMTQ1MzU2fQ.kmmHfO7mGpHsoZoRcAis373rwNDyyzj3rT0-nbiJmN4'
 
 describe('verifyUserSignature()', function () {
   it('expect to return false when user signature not exists', function () {
@@ -33,6 +31,20 @@ describe('verifyUserSignature()', function () {
     expect(verifyUserSignature(payload)).to.be.false
   })
 
+  it('expect to return FALSE when user signature timestamp invalid', async () => {
+    // eslint-disable-next-line new-cap
+    const wallet = new ethers.Wallet.createRandom()
+    const payload = toJwtPayload({
+      address: await wallet.getAddress(),
+      scope: 'id'
+    })
+    payload.userSignatureTimestamp = 123
+    const sig = await wallet.signMessage(payload.messageToSignByUser())
+    payload.setUserSignature(sig.toString(), 111)
+
+    expect(verifyUserSignature(payload)).to.be.false
+  })
+
   it('expect to return TRUE when user signature valid', async () => {
     // eslint-disable-next-line new-cap
     const wallet = new ethers.Wallet.createRandom()
@@ -41,10 +53,47 @@ describe('verifyUserSignature()', function () {
       email: 'a@c',
       scope: 'email'
     })
+    payload.userSignatureTimestamp = 123
     const sig = await wallet.signMessage(payload.messageToSignByUser())
-    payload.setUserSignature(sig.toString())
+    payload.setUserSignature(sig.toString(), payload.userSignatureTimestamp)
 
     expect(verifyUserSignature(payload)).to.be.true
+  })
+})
+
+describe('verifySilkeySignature()', function () {
+  it('expect to return null when email and sig empty', function () {
+    expect(verifySilkeySignature(toJwtPayload({}))).to.be.null
+  })
+
+  it('expect to return FALSE when email xor silkeySignature empty', function () {
+    expect(verifySilkeySignature(toJwtPayload({ email: 'a' }))).to.be.false
+    expect(verifySilkeySignature(toJwtPayload({ silkeySignature: 'a' }))).to.be.false
+    expect(verifySilkeySignature(toJwtPayload({
+      silkeySignature: 'a',
+      email: 'a'
+    }))).to.be.false
+  })
+
+  it('expect to return TRUE', function () {
+    const payload = toJwtPayload({
+      email: 'aliasId@privaterelay',
+      silkeySignature: '0x228b203190b5c1f764e3a5a830bf40702fa1ebed3ce67734a38fb40b8da99ce97218238371ca93f3c8501348b520b1a5399f4cf39995ccbcd48b4fffe48aa7ca1b',
+      silkeySignatureTimestamp: 1605290733
+    })
+
+    expect(verifySilkeySignature(payload)).to.be.true
+    expect(verifySilkeySignature(payload, publicKey)).to.be.true
+  })
+
+  it('expect to return FALSE if public key do not match', function () {
+    const payload = toJwtPayload({
+      email: 'aliasId@privaterelay',
+      silkeySignature: '0x228b203190b5c1f764e3a5a830bf40702fa1ebed3ce67734a38fb40b8da99ce97218238371ca93f3c8501348b520b1a5399f4cf39995ccbcd48b4fffe48aa7ca1b',
+      silkeySignatureTimestamp: 1605290733
+    })
+
+    expect(verifySilkeySignature(payload, '0x6F2c3d07d43aE3c48793507999e7953480D5749E')).to.be.false
   })
 })
 

@@ -1,13 +1,14 @@
+import dotenv from 'dotenv'
 import chai from 'chai'
-import { generateSSORequestParams, messageToSign } from '../src/sso.js'
+
+import { privateKey } from './keys.js'
+import { fetchSilkeyPublicKey, generateSSORequestParams, messageToSign } from '../src/sso.js'
+
+dotenv.config()
 
 const { expect } = chai
 
 describe('sso.js', () => {
-  // address: 0xDBF03b99664deb3C73045ac8933A6db89fefFf5F
-  // this is random PK, please do not use it for anything else than this test
-  const privateKey = '0x2c06e0037dacc4a831049ce0770f5f6f788827659a5842ed96d34c0631d5f6de'
-
   const t = Math.round(Date.now() / 1000)
 
   describe('messageToSign()', () => {
@@ -18,8 +19,8 @@ describe('sso.js', () => {
 
     it('generates message with data', () => {
       const m = messageToSign({
-        a: 1,
-        b: 2
+        b: 2,
+        a: 1
       })
       expect(m).to.eq('a=1::b=2')
     })
@@ -35,42 +36,45 @@ describe('sso.js', () => {
     })
 
     it('generates signature for SSO request', async () => {
-      const { signature, message } = await generateSSORequestParams(privateKey, { timestamp: 1602151787 })
+      const { signature, ssoTimestamp } = await generateSSORequestParams(privateKey, { ssoTimestamp: 1602151787, redirectUrl: 'http', cancelUrl: 'http' })
 
-      expect(signature).to.eq('0xb7991dccf840cf5600c4d3d5506e7aeea5472562221eedfd405d12cb99acecc57672ec1c304e5530cdc909705fff3478c25471c0de20475cf5091b012300c0461b')
-      expect(message).to.eq('cancelUrl=::redirectUrl=::refId=::scope=::timestamp=1602151787')
+      expect(signature).to.eq('0x225883a83c013f87f69c5ec45c1e1644562a261c194b2752458b6001d282dbbf60e95f5f335e84cbfc0ef8cf58d15d77cf73d124bc0c1791f0ab61a0b7e48aa31b')
+      expect(ssoTimestamp).to.eq(1602151787)
     })
 
     it('sets timestamp when not provided', async () => {
       const awaits = [
-        generateSSORequestParams(privateKey),
-        generateSSORequestParams(privateKey, { timestamp: null }),
-        generateSSORequestParams(privateKey, { timestamp: '' })
+        generateSSORequestParams(privateKey, { redirectUrl: 'http', cancelUrl: 'http' }),
+        generateSSORequestParams(privateKey, { ssoTimestamp: null, redirectUrl: 'http', cancelUrl: 'http' }),
+        generateSSORequestParams(privateKey, { ssoTimestamp: '', redirectUrl: 'http', cancelUrl: 'http' })
       ]
 
       const results = await Promise.all(awaits)
 
-      results.forEach(({ timestamp }) => {
-        expect(timestamp).to.gte(t)
+      results.forEach(({ ssoTimestamp }) => {
+        expect(ssoTimestamp).to.gte(t)
       })
     })
 
     it('generates same signature for null/empty data', async () => {
       const { signature } = await generateSSORequestParams(privateKey, {
         timestamp: 1,
-        redirectUrl: '',
+        redirectUrl: 'http',
+        cancelUrl: 'http',
         refId: '',
         scope: ''
       })
       const data2 = await generateSSORequestParams(privateKey, {
         timestamp: 1,
-        redirectUrl: null,
+        redirectUrl: 'http',
+        cancelUrl: 'http',
         refId: null,
         scope: null
       })
       const data3 = await generateSSORequestParams(privateKey, {
         timestamp: 1,
-        redirectUrl: undefined,
+        redirectUrl: 'http',
+        cancelUrl: 'http',
         refId: undefined,
         scope: undefined
       })
@@ -95,6 +99,14 @@ describe('sso.js', () => {
       console.log(res1)
 
       expect(res1.signature).to.eq(res2.signature)
+    })
+  })
+
+  describe('fetchSilkeyPublicKey()', () => {
+    it('expect to fetch silkey public key', async () => {
+      const m = await fetchSilkeyPublicKey(process.env.PROVIDER_URI, '0xcEf09Bdb5d73055bc52C55E81F1138f48bcc0eCc')
+      expect(m).not.to.eq('0x0000000000000000000000000000000000000000')
+      expect(m.length).to.eq(42)
     })
   })
 })

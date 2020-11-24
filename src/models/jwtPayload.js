@@ -2,7 +2,14 @@
  * @module JwtPayloadModel
  */
 
-import { intToBuffer, isEmpty, isEthereumAddress, isSignature } from '../utils/helpers.js'
+import {
+  currentTimestamp,
+  intToBuffer,
+  isEmpty,
+  isEthereumAddress,
+  isSignature,
+  remove0x
+} from '../utils/helpers.js'
 
 export const SCOPE_DIVIDER = ','
 
@@ -11,10 +18,13 @@ export const SCOPE_DIVIDER = ','
  */
 function JwtPayloadObj () {
   this.scope = ''
-  this.silkeySignature = null
-  this.silkeySignatureTimestamp = null
-  this.userSignature = null
-  this.address = null
+  this.address = ''
+  this.refId = ''
+  this.email = ''
+  this.silkeySignature = ''
+  this.silkeySignatureTimestamp = ''
+  this.userSignature = ''
+  this.userSignatureTimestamp = ''
 }
 
 JwtPayloadObj.prototype.setScope = function (scope) {
@@ -32,7 +42,7 @@ JwtPayloadObj.prototype.setScope = function (scope) {
   str.split(SCOPE_DIVIDER).filter(k => !isEmpty(k)).forEach(k => {
     map[k] = k
   })
-  this.scope = Object.keys(map).join(SCOPE_DIVIDER)
+  this.scope = Object.keys(map).sort().join(SCOPE_DIVIDER)
 
   return this
 }
@@ -68,17 +78,17 @@ JwtPayloadObj.prototype.setRefId = function (refId) {
   return this
 }
 
-JwtPayloadObj.prototype.setTimestamp = function () {
-  this.timestamp = Math.round(Date.now() / 1000)
-  return this
-}
-
-JwtPayloadObj.prototype.setUserSignature = function (sig) {
+JwtPayloadObj.prototype.setUserSignature = function (sig, timestamp) {
   if (!isSignature(sig)) {
     throw Error(`user signature is invalid: ${sig}`)
   }
 
+  if (isEmpty(timestamp)) {
+    throw Error(`user signature timestamp is invalid: ${timestamp}`)
+  }
+
   this.userSignature = sig
+  this.userSignatureTimestamp = timestamp
   return this
 }
 
@@ -104,17 +114,20 @@ JwtPayloadObj.prototype.setSilkeySignature = function (sig, timestamp) {
  * @returns {string}
  */
 JwtPayloadObj.prototype.messageToSignByUser = function () {
-  const keys = Object.keys(this)
-    .filter(k => !['silkeySignature', 'userSignature', 'email', 'iat'].includes(k))
-    .sort()
+  if (!isEmpty(this.address) && isEmpty(this.userSignatureTimestamp)) {
+    this.userSignatureTimestamp = currentTimestamp()
+  }
 
-  const items = []
-
-  keys.forEach(k => {
-    items.push(this[k])
-  })
-
-  return items.join(':')
+  return Buffer.concat([
+    Buffer.from('address'),
+    Buffer.from(remove0x(this.address.toLowerCase()), 'hex'),
+    Buffer.from('refId'),
+    Buffer.from(this.refId.toString()),
+    Buffer.from('scope'),
+    Buffer.from(this.scope),
+    Buffer.from('userSignatureTimestamp'),
+    intToBuffer(this.userSignatureTimestamp)
+  ]).toString('hex')
 }
 
 /**
@@ -126,13 +139,49 @@ JwtPayloadObj.prototype.messageToSignByUser = function () {
  */
 JwtPayloadObj.prototype.messageToSignBySilkey = function () {
   if (isEmpty(this.email)) {
-    return null
+    return ''
+  }
+
+  if (isEmpty(this.silkeySignatureTimestamp)) {
+    this.silkeySignatureTimestamp = currentTimestamp()
   }
 
   return Buffer.concat([
     Buffer.from(this.email),
     intToBuffer(this.silkeySignatureTimestamp)
   ]).toString('hex')
+}
+
+JwtPayloadObj.prototype.validate = function () {
+  if (!isEthereumAddress(this.address)) {
+    throw new Error(`address is invalid: ${this.address}`)
+  }
+
+  if (!isSignature(this.userSignature)) {
+    throw new Error(`userSignature is invalid: ${this.userSignature}`)
+  }
+
+  if (isEmpty(this.userSignatureTimestamp)) {
+    throw new Error('userSignatureTimestamp is empty')
+  }
+
+  if (isEmpty(this.scope) || this.scope === 'id') {
+    return this
+  }
+
+  if (isEmpty(this.email)) {
+    throw new Error(`email is invalid: ${this.email}`)
+  }
+
+  if (!isSignature(this.silkeySignature)) {
+    throw new Error(`silkeySignature is invalid: ${this.silkeySignature}`)
+  }
+
+  if (isEmpty(this.silkeySignatureTimestamp)) {
+    throw new Error(`silkeySignatureTimestamp is invalid: ${this.silkeySignatureTimestamp}`)
+  }
+
+  return this
 }
 
 JwtPayloadObj.prototype.export = function () {

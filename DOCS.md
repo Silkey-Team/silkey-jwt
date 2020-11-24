@@ -3,9 +3,38 @@
 ## SilkeySDK
 
 * [SilkeySDK](#module_SilkeySDK)
+    * [.verifySilkeySignature](#module_SilkeySDK.verifySilkeySignature) ⇒ <code>null</code> \| <code>boolean</code>
+    * [.fetchSilkeyPublicKey](#module_SilkeySDK.fetchSilkeyPublicKey) ⇒ <code>Promise.&lt;string&gt;</code>
     * [.messageToSign(data)](#module_SilkeySDK.messageToSign) ⇒ <code>string</code>
     * [.generateSSORequestParams(privateKey, data)](#module_SilkeySDK.generateSSORequestParams) ⇒ <code>Object</code>
     * [.tokenPayloadVerifier(token, silkeyPublicKey)](#module_SilkeySDK.tokenPayloadVerifier) ⇒ <code>JwtPayload</code> \| <code>null</code>
+
+<a name="module_SilkeySDK.verifySilkeySignature"></a>
+
+### SilkeySDK.verifySilkeySignature ⇒ <code>null</code> \| <code>boolean</code>
+By default we do not check silkey signature (if not provided)
+as token is provided by silkey itself and therer is no incentives to manipulate with silkey signature
+But it is strongly recommended to provide silkeyPublicKey and have full validation.
+
+**Kind**: static constant of [<code>SilkeySDK</code>](#module_SilkeySDK)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| tokenPayload | <code>string</code> | token returned by silkey |
+| silkeyPublicKey | <code>string</code> | optional |
+
+<a name="module_SilkeySDK.fetchSilkeyPublicKey"></a>
+
+### SilkeySDK.fetchSilkeyPublicKey ⇒ <code>Promise.&lt;string&gt;</code>
+Fetches public ethereum Silkey address directly from blockchain
+
+**Kind**: static constant of [<code>SilkeySDK</code>](#module_SilkeySDK)  
+**Returns**: <code>Promise.&lt;string&gt;</code> - public ethereum address of silkey signer  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| providerUri | <code>string</code> | ie: 'https://infura.io/v3/:infuraId' register to infura.io to get infuraId |
+| registryAddress | <code>string</code> | address of silkey smart contract registry, see list of addresses in README#registryAddress |
 
 <a name="module_SilkeySDK.messageToSign"></a>
 
@@ -33,11 +62,11 @@ Generates all needed parameters (including signature) for requesting Silkey SSO
 | Param | Type | Description |
 | --- | --- | --- |
 | privateKey | <code>string</code> | this should be private key of domain owner |
-| data | <code>Object</code> | Object with data: {redirectUrl*, cancelUrl*, refId*, scope, timestamp}  marked with * are required by Silkey SSO |
+| data | <code>Object</code> | Object with data: {redirectUrl*, redirectMethod, cancelUrl*, refId, scope, ssoTimestamp*}  marked with * are required by Silkey SSO |
 
 **Example**  
 ```js
-// returns {signature, message, timestamp, redirectUrl, refId, scope}
+// returns {signature, ssoTimestamp, redirectUrl, refId, scope, redirectMethod}
 await generateSSORequestParams(domainOwnerPrivateKey, {redirectUrl: 'http://silkey.io', refId: 1});
 ```
 <a name="module_SilkeySDK.tokenPayloadVerifier"></a>
@@ -61,5 +90,5 @@ Verifies JWT token payload
 **Example**  
 ```js
 // returns {JwtPayload}
-tokenPayloadVerifier('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjB4M0EzQTYyMzUxRkFlN2QxOTNlZjUxNTU3MUIxRjM1OTUwNzhEZDllMEBwcml2YXRlcmVsYXkuc2lsa2V5LmlvIiwiYWRkcmVzcyI6IjB4M0EzQTYyMzUxRkFlN2QxOTNlZjUxNTU3MUIxRjM1OTUwNzhEZDllMCIsInNpZ25hdHVyZSI6eyJyIjoiMHg5NzhmZTdhZmMwODY1NTk4YTNiYTNmOGUzMTI0ZDBkMGM3MGYyMTMwOTQ5YTBhZDRiZTk3ODc5MWI0ZGQ2Y2Q3IiwicyI6IjB4MDU1NjEwZGYzZmI2ODAyYzgwZjQ0NzVjNjIyNDc1OGM0Y2VjNWVkMTllMTMzN2YwODEwMmM3NjNlYWM2Y2JjMyIsIl92cyI6IjB4ODU1NjEwZGYzZmI2ODAyYzgwZjQ0NzVjNjIyNDc1OGM0Y2VjNWVkMTllMTMzN2YwODEwMmM3NjNlYWM2Y2JjMyIsInJlY292ZXJ5UGFyYW0iOjEsInYiOjI4fSwiaWF0IjoxNjAyMTQ0OTk2fQ.eU3B-jHnu8ToKeU9833jhr9Klvzwpb_oY60Q_jDW0js');
+tokenPayloadVerifier('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
 ```

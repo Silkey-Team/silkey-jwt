@@ -2,15 +2,13 @@
  * @module SilkeySDK
  */
 
-import ethersjs from 'ethers'
-import { isEmpty, isSet } from './utils/helpers.js'
+import ethersjs from './import-ethers/index.js'
+import { currentTimestamp, isEmpty, isEthereumAddress } from './utils/helpers.js'
 import jwt from 'jsonwebtoken'
 import { toJwtPayload } from './models/index.js'
+import { createProvider, Registry } from './contracts/index.js'
 
 const { ethers } = ethersjs
-
-let wallet
-
 const parser = v => isEmpty(v) ? '' : v
 
 /**
@@ -25,7 +23,9 @@ const parser = v => isEmpty(v) ? '' : v
  */
 export const messageToSign = (data = {}) => {
   const msg = []
-  Object.keys(data).sort().forEach(k => { msg.push(`${k}=${parser(data[k])}`) })
+  Object.keys(data).sort().forEach(k => {
+    msg.push(`${k}=${parser(data[k])}`)
+  })
   return msg.join('::')
 }
 
@@ -35,71 +35,126 @@ export const messageToSign = (data = {}) => {
  * @async
  * @method
  * @param privateKey {string} this should be private key of domain owner
- * @param data {{redirectUrl, cancelUrl, refId, scope, timestamp}} Object with data: {redirectUrl*, cancelUrl*, refId*, scope, timestamp}
+ * @param data {{redirectUrl, redirectMethod, cancelUrl, refId, scope, ssoTimestamp}} Object with data: {redirectUrl*, redirectMethod, cancelUrl*, refId, scope, ssoTimestamp*}
  *  marked with * are required by Silkey SSO
- * @returns {{signature, message, timestamp, redirectUrl, refId, scope}}
+ * @returns {{signature, ssoTimestamp, redirectUrl, refId, scope}}
  * @example
- * // returns {signature, message, timestamp, redirectUrl, refId, scope}
+ * // returns {signature, ssoTimestamp, redirectUrl, refId, scope, redirectMethod}
  * await generateSSORequestParams(domainOwnerPrivateKey, {redirectUrl: 'http://silkey.io', refId: 1});
  */
 export const generateSSORequestParams = async (privateKey, data = {}) => {
-  const redirectUrl = data.redirectUrl || null
-  const cancelUrl = data.cancelUrl || null
-  const timestamp = data.timestamp || Math.round(Date.now() / 1000)
-  const refId = data.refId || null
-  const scope = data.scope || null
+  if (isEmpty(data.redirectUrl)) {
+    throw Error('`data.redirectUrl` is required')
+  }
 
-  wallet = new ethers.Wallet(privateKey)
-  const message = messageToSign({ redirectUrl, cancelUrl, timestamp, refId, scope })
+  if (isEmpty(data.cancelUrl)) {
+    throw Error('`data.redirectUrl` is required')
+  }
+
+  const { redirectUrl, cancelUrl, redirectMethod, refId } = data
+  const ssoTimestamp = data.ssoTimestamp || currentTimestamp()
+  const scope = data.scope || 'id'
+
+  const wallet = new ethers.Wallet(privateKey)
+
+  const dataToSign = {}
+
+  const items = { redirectUrl, redirectMethod, cancelUrl, ssoTimestamp, refId, scope }
+
+  Object.keys(items).forEach(k => {
+    if (!isEmpty(items[k])) {
+      dataToSign[k] = items[k]
+    }
+  })
+
+  const message = messageToSign(dataToSign)
   const signature = await wallet.signMessage(message)
-  return { signature, message, timestamp, redirectUrl, cancelUrl, refId, scope }
+
+  return {
+    ...dataToSign,
+    signature
+  }
 }
 
 export const verifyUserSignature = tokenPayload => {
   try {
     const payload = toJwtPayload(tokenPayload)
 
-    if (isEmpty(payload.userSignature) || isEmpty(payload.address)) {
-      console.warn('Verification failed, missing user signature and/or address')
+    if (isEmpty(payload.userSignature) || isEmpty(payload.userSignatureTimestamp) || isEmpty(payload.address)) {
+      console.warn('Verification failed, missing user signature/timestamp and/or address')
       return false
     }
 
     const message = payload.messageToSignByUser()
     const signer = ethers.utils.verifyMessage(message, payload.userSignature)
-    return signer.toLowerCase() === payload.address.toLowerCase()
+    const success = signer.toLowerCase() === payload.address.toLowerCase()
+    !success && console.warn(`verifyUserSignature: expect ${signer} to be equal ${payload.address}`)
+
+    return success
   } catch (e) {
     console.warn(e)
     return false
   }
 }
 
+/**
+ * By default we do not check silkey signature (if not provided)
+ * as token is provided by silkey itself and therer is no incentives to manipulate with silkey signature
+ * But it is strongly recommended to provide silkeyPublicKey and have full validation.
+ *
+ * @param tokenPayload {string} token returned by silkey
+ * @param silkeyPublicKey {string} optional
+ * @return {null|boolean}
+ */
 export const verifySilkeySignature = (tokenPayload, silkeyPublicKey) => {
   try {
     const payload = toJwtPayload(tokenPayload)
 
-    if (isSet(payload.email) ^ isSet(payload.silkeySignature)) {
+    if (isEmpty(payload.email) && isEmpty(payload.silkeySignature)) {
+      return null
+    }
+
+    if (isEmpty(payload.email) ^ isEmpty(payload.silkeySignature)) {
       console.warn('Verification failed, missing silkey signature or email')
       return false
     }
 
-    if (!isSet(payload.email) && !isSet(payload.silkeySignature)) {
-      return null
-    }
-
-    if (isEmpty(silkeyPublicKey)) {
-      console.warn('Verification failed, missing silkeyPublicKey')
+    if (isEmpty(payload.silkeySignatureTimestamp)) {
+      console.warn('Verification failed, missing silkey signature timestamp')
       return false
     }
 
     const signer = ethers.utils.verifyMessage(payload.messageToSignBySilkey(), payload.silkeySignature)
-    const result = signer.toLowerCase() === silkeyPublicKey.toLowerCase()
-    !result && console.warn(`verifySilkeySignature: expect ${signer} to be equal ${silkeyPublicKey}`)
 
-    return result
+    if (isEmpty(silkeyPublicKey)) {
+      console.warn('You are using verification without checking silkey signature. We strongly recommended to turn on full verification. This option can be deprecated in the future')
+      return true
+    }
+
+    const success = signer.toLowerCase() === silkeyPublicKey.toLowerCase()
+    !success && console.warn(`verifySilkeySignature: expect ${signer} to be equal ${silkeyPublicKey}`)
+
+    return success
   } catch (e) {
     console.warn(e)
     return false
   }
+}
+
+/**
+ * Fetches public ethereum Silkey address directly from blockchain
+ *
+ * @param providerUri {string} ie: 'https://infura.io/v3/:infuraId' register to infura.io to get infuraId
+ * @param registryAddress {string} address of silkey smart contract registry, see list of addresses in README#registryAddress
+ * @return {Promise<string>} public ethereum address of silkey signer
+ */
+export const fetchSilkeyPublicKey = async (providerUri, registryAddress) => {
+  const provider = createProvider(providerUri)
+  const registry = new Registry(provider, registryAddress)
+  const key = await registry.getAddress('Hades')
+
+  if (!isEthereumAddress(key)) throw Error(`Invalid key: ${key}`)
+  return key
 }
 
 /**
@@ -113,7 +168,7 @@ export const verifySilkeySignature = (tokenPayload, silkeyPublicKey) => {
  * @throws when token is invalid or data are corrupted
  * @example
  * // returns {JwtPayload}
- * tokenPayloadVerifier('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjB4M0EzQTYyMzUxRkFlN2QxOTNlZjUxNTU3MUIxRjM1OTUwNzhEZDllMEBwcml2YXRlcmVsYXkuc2lsa2V5LmlvIiwiYWRkcmVzcyI6IjB4M0EzQTYyMzUxRkFlN2QxOTNlZjUxNTU3MUIxRjM1OTUwNzhEZDllMCIsInNpZ25hdHVyZSI6eyJyIjoiMHg5NzhmZTdhZmMwODY1NTk4YTNiYTNmOGUzMTI0ZDBkMGM3MGYyMTMwOTQ5YTBhZDRiZTk3ODc5MWI0ZGQ2Y2Q3IiwicyI6IjB4MDU1NjEwZGYzZmI2ODAyYzgwZjQ0NzVjNjIyNDc1OGM0Y2VjNWVkMTllMTMzN2YwODEwMmM3NjNlYWM2Y2JjMyIsIl92cyI6IjB4ODU1NjEwZGYzZmI2ODAyYzgwZjQ0NzVjNjIyNDc1OGM0Y2VjNWVkMTllMTMzN2YwODEwMmM3NjNlYWM2Y2JjMyIsInJlY292ZXJ5UGFyYW0iOjEsInYiOjI4fSwiaWF0IjoxNjAyMTQ0OTk2fQ.eU3B-jHnu8ToKeU9833jhr9Klvzwpb_oY60Q_jDW0js');
+ * tokenPayloadVerifier('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
  */
 export const tokenPayloadVerifier = (token, silkeyPublicKey = null) => {
   try {
