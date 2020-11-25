@@ -1,7 +1,9 @@
-# Silkey SDK
+![Silkey Logo](https://raw.githubusercontent.com/Silkey-Team/brand/master/silkey-word-black.png)
+
+# Silkey SDK for NodeJS
 
 [![GitHub version](https://badge.fury.io/gh/Silkey-Team%2Fsilkey-sdk.svg)](https://badge.fury.io/gh/Silkey-Team%2Fsilkey-sdk)
-[![npm version](https://badge.fury.io/js/silkey-sdk.svg)](//npmjs.com/package/silkey-sdk)
+[![npm version](https://badge.fury.io/js/%40silkey%2Fsdk.svg)](https://badge.fury.io/js/%40silkey%2Fsdk)
 
 SDK package for integrate with Silkey standard of Decentralised SSO.
 
@@ -168,4 +170,4 @@ if (jwtPayload === null) {
 
 ## SDK for other platforms
 
-- [Silkey SDK for Ruby](https://rubygems.org/gems/silkey-sdk)
+- [Silkey SDK for Ruby](https://rubygems.org/gems/silkey-sdk) [![Gem Version](https://badge.fury.io/rb/silkey-sdk.svg)](https://badge.fury.io/rb/silkey-sdk)
