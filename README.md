@@ -1,6 +1,6 @@
-![Silkey Logo](https://raw.githubusercontent.com/Silkey-Team/brand/master/silkey-word-black.png)
-
 # Silkey SDK for NodeJS
+
+![Silkey Logo](https://raw.githubusercontent.com/Silkey-Team/brand/master/silkey-word-black.png)
 
 [![GitHub version](https://badge.fury.io/gh/Silkey-Team%2Fsilkey-sdk.svg)](https://badge.fury.io/gh/Silkey-Team%2Fsilkey-sdk)
 [![npm version](https://badge.fury.io/js/%40silkey%2Fsdk.svg)](https://badge.fury.io/js/%40silkey%2Fsdk)
@@ -25,8 +25,8 @@ Redirect user to Silkey with parameters:
 | signature        | yes       | string   | Domain owner signature
 | ssoTimestamp     | yes       | number   | Time of signing SSO request
 | redirectUrl      | yes       | string   | Where to redirect user with token after sign in
-| redirectMethod   | no        | GET/POST | How to redirect user after sign in, default is POST
 | cancelUrl        | yes       | string   | Where to redirect user on error
+| redirectMethod   | no        | GET/POST | How to redirect user after sign in, default is POST
 | refId            | no        | string   | It will be return with user token, you may use it to identify request
 | scope            | no        | string   | Scope of data to return in a token payload: `id` (default) returns only user address, `email` returns address + email
 
@@ -82,9 +82,6 @@ The Production
     - Create an account for the application
     - Click on account details then export private key to view and write down the private key
     
-    A very small amount of ether is used to verify that the domain is registered.
-    To obtain free ether on the Rinkeby test network visit https://faucet.rinkeby.io/
-    
 1. Authenticate the domain of the application in Apollo with the generated wallet:
 
    Visit the propper Apollo url (see above), there is a wizzard that will guide you through all this steps:
@@ -96,6 +93,9 @@ The Production
     - Add logo url that will be displayed when a user is loging in using silkey
     - Send a transaction which will save the registration
 
+    Some amount of ether is used to send transaction to blockchain.
+    To obtain free ether on the Sandbox (Rinkeby test network) visit https://faucet.rinkeby.io/
+    
 3.  Export private key from MetaMask and store it in a secure way inside your application. You will need it to generate the request for *Silkey Sing In*.
 
 #### On SignIn page
