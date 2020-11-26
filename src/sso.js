@@ -3,7 +3,7 @@
  */
 
 import ethersjs from './import-ethers/index.js'
-import { currentTimestamp, isEmpty, isEthereumAddress } from './utils/helpers.js'
+import { currentTimestamp, isEmpty, isEthereumAddress, isSet } from './utils/helpers.js'
 import jwt from 'jsonwebtoken'
 import { toJwtPayload } from './models/index.js'
 import { createProvider, Registry } from './contracts/index.js'
@@ -23,10 +23,14 @@ const parser = v => isEmpty(v) ? '' : v
  */
 export const messageToSign = (data = {}) => {
   const msg = []
+
   Object.keys(data).sort().forEach(k => {
-    msg.push(`${k}=${parser(data[k])}`)
+    if (isSet(data[k])) {
+      msg.push(`${k}=${parser(data[k])}`)
+    }
   })
-  return msg.join('::')
+
+  return msg.join('&')
 }
 
 /**
@@ -35,37 +39,40 @@ export const messageToSign = (data = {}) => {
  * @async
  * @method
  * @param privateKey {string} this should be private key of domain owner
- * @param data {{redirectUrl, redirectMethod, cancelUrl, refId, scope, ssoTimestamp}} Object with data: {redirectUrl*, redirectMethod, cancelUrl*, refId, scope, ssoTimestamp*}
+ * @param params {{redirectUrl, redirectMethod, cancelUrl, refId, scope, ssoTimestamp}} Object with data: {redirectUrl*, redirectMethod, cancelUrl*, refId, scope, ssoTimestamp}
  *  marked with * are required by Silkey SSO
  * @returns {{signature, ssoTimestamp, redirectUrl, refId, scope}}
+ * @throws on missing required data
  * @example
  * // returns {signature, ssoTimestamp, redirectUrl, refId, scope, redirectMethod}
  * await generateSSORequestParams(domainOwnerPrivateKey, {redirectUrl: 'http://silkey.io', refId: 1});
  */
-export const generateSSORequestParams = async (privateKey, data = {}) => {
-  if (isEmpty(data.redirectUrl)) {
-    throw Error('`data.redirectUrl` is required')
+export const generateSSORequestParams = async (privateKey, params = {}) => {
+  if (isEmpty(privateKey)) {
+    throw Error('`privateKey` is required')
   }
 
-  if (isEmpty(data.cancelUrl)) {
-    throw Error('`data.redirectUrl` is required')
+  const dataToSign = { ...params }
+
+  const { redirectUrl, cancelUrl, ssoTimestamp, scope } = dataToSign
+
+  if (isEmpty(redirectUrl)) {
+    throw Error('`redirectUrl` is required')
   }
 
-  const { redirectUrl, cancelUrl, redirectMethod, refId } = data
-  const ssoTimestamp = data.ssoTimestamp || currentTimestamp()
-  const scope = data.scope || 'id'
+  if (isEmpty(cancelUrl)) {
+    throw Error('`cancelUrl` is required')
+  }
+
+  if (isEmpty(ssoTimestamp)) {
+    dataToSign.ssoTimestamp = currentTimestamp()
+  }
+
+  if (isEmpty(scope)) {
+    dataToSign.scope = 'id'
+  }
 
   const wallet = new ethers.Wallet(privateKey)
-
-  const dataToSign = {}
-
-  const items = { redirectUrl, redirectMethod, cancelUrl, ssoTimestamp, refId, scope }
-
-  Object.keys(items).forEach(k => {
-    if (!isEmpty(items[k])) {
-      dataToSign[k] = items[k]
-    }
-  })
 
   const message = messageToSign(dataToSign)
   const signature = await wallet.signMessage(message)

@@ -6,7 +6,7 @@
     * [.verifySilkeySignature](#module_SilkeySDK.verifySilkeySignature) ⇒ <code>null</code> \| <code>boolean</code>
     * [.fetchSilkeyPublicKey](#module_SilkeySDK.fetchSilkeyPublicKey) ⇒ <code>Promise.&lt;string&gt;</code>
     * [.messageToSign(data)](#module_SilkeySDK.messageToSign) ⇒ <code>string</code>
-    * [.generateSSORequestParams(privateKey, data)](#module_SilkeySDK.generateSSORequestParams) ⇒ <code>Object</code>
+    * [.generateSSORequestParams(privateKey, params)](#module_SilkeySDK.generateSSORequestParams) ⇒ <code>Object</code>
     * [.tokenPayloadVerifier(token, silkeyPublicKey)](#module_SilkeySDK.tokenPayloadVerifier) ⇒ <code>JwtPayload</code> \| <code>null</code>
 
 <a name="module_SilkeySDK.verifySilkeySignature"></a>
@@ -54,15 +54,19 @@ messageToSign({redirectUrl: 'http://silkey.io', refId: 1});
 ```
 <a name="module_SilkeySDK.generateSSORequestParams"></a>
 
-### SilkeySDK.generateSSORequestParams(privateKey, data) ⇒ <code>Object</code>
+### SilkeySDK.generateSSORequestParams(privateKey, params) ⇒ <code>Object</code>
 Generates all needed parameters (including signature) for requesting Silkey SSO
 
 **Kind**: static method of [<code>SilkeySDK</code>](#module_SilkeySDK)  
+**Throws**:
+
+- on missing required data
+
 
 | Param | Type | Description |
 | --- | --- | --- |
 | privateKey | <code>string</code> | this should be private key of domain owner |
-| data | <code>Object</code> | Object with data: {redirectUrl*, redirectMethod, cancelUrl*, refId, scope, ssoTimestamp*}  marked with * are required by Silkey SSO |
+| params | <code>Object</code> | Object with data: {redirectUrl*, redirectMethod, cancelUrl*, refId, scope, ssoTimestamp}  marked with * are required by Silkey SSO |
 
 **Example**  
 ```js

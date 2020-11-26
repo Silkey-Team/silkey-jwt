@@ -1,6 +1,6 @@
 {
   "name": "@silkey/sdk",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "SDK for Sign In with Silke",
   "main": "src/index.js",
   "type": "module",
@@ -12,6 +12,7 @@
     "test": "mocha test",
     "test:one": "mocha ",
     "doc": "jsdoc2md src/sso.js > DOCS.md",
+    "git:amend": "git commit --amend --no-edit && git push --force",
     "pre-push": "npm run lint && npm run doc && npm run test"
   },
   "repository": {
