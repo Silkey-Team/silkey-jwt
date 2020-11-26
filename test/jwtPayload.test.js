@@ -1,5 +1,6 @@
 import chai from 'chai'
 import { JwtPayload, toJwtPayload } from '../src/models/jwtPayload.js'
+import { expectThrows } from './utils/utils.js'
 
 const { expect, assert } = chai
 
@@ -97,13 +98,13 @@ describe('validate()', async () => {
 
     it('throws when required data present', () => {
       const payload = new JwtPayload()
-      assert.throws(() => payload.validate(), Error)
+      expectThrows(() => payload.validate(), Error, 'address is invalid: ')
 
       payload.setScope('id')
-      assert.throws(() => payload.validate(), Error)
+      expectThrows(() => payload.validate(), Error, 'address is invalid: ')
 
       payload.setAddress(address)
-      assert.throws(() => payload.validate(), Error)
+      expectThrows(() => payload.validate(), Error, 'userSignature is invalid: ')
 
       payload.setUserSignature('0'.repeat(130), currentTimestamp)
       assert.doesNotThrow(() => payload.validate())
@@ -123,19 +124,19 @@ describe('validate()', async () => {
 
     it('throws when required data present', () => {
       const payload = new JwtPayload()
-      assert.throws(() => payload.validate(), Error)
+      expectThrows(() => payload.validate(), Error, 'address is invalid: ')
 
       payload.setScope('email')
-      assert.throws(() => payload.validate(), Error)
+      expectThrows(() => payload.validate(), Error, 'address is invalid: ')
 
       payload.setAddress(address)
-      assert.throws(() => payload.validate(), Error)
+      expectThrows(() => payload.validate(), Error, 'userSignature is invalid: ')
 
       payload.setUserSignature('0'.repeat(130), currentTimestamp)
-      assert.throws(() => payload.validate(), Error)
+      expectThrows(() => payload.validate(), Error, 'email is invalid: ')
 
       payload.setEmail('a@b')
-      assert.throws(() => payload.validate(), Error)
+      expectThrows(() => payload.validate(), Error, 'silkeySignature is invalid: ')
 
       payload.setSilkeySignature('0'.repeat(130), currentTimestamp)
       assert.doesNotThrow(() => payload.validate())
