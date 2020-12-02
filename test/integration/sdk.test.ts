@@ -1,16 +1,13 @@
-import dotenv from 'dotenv'
-import chai from 'chai'
-import ethersjs from 'ethers'
+import * as dotenv from 'dotenv'
+import {expect} from 'chai'
+import {ethers} from 'ethers'
 
-import { publicKey, privateKey } from './keys.js'
-import { prepend0x } from '../src/utils/helpers.js'
+import { publicKey, privateKey } from '../keys'
+import { prepend0x } from '../../src/utils/helpers'
 
 dotenv.config()
 
-const { expect } = chai
-const { ethers } = ethersjs
-
-describe('sso.js', () => {
+describe('sso', () => {
   describe('eth - SDK alignment test', () => {
     const wallet = new ethers.Wallet(privateKey)
 

@@ -1,8 +1,6 @@
-import chai from 'chai'
+import {expect} from 'chai'
 
-import { intToBuffer } from '../src/utils/helpers.js'
-
-const { expect } = chai
+import {intToBuffer} from '../../src/utils/helpers'
 
 describe('timestampToBuffer()', () => {
   it('expect to convert timestamp number to buffer', async () => {
@@ -11,12 +9,11 @@ describe('timestampToBuffer()', () => {
     expect(intToBuffer(31).toString('hex')).to.eq('1f')
     expect(intToBuffer(256).toString('hex')).to.eq('0100')
     expect(intToBuffer(1604499020).toString('hex')).to.eq('5fa2b64c')
-    expect(intToBuffer('1604499020').toString('hex')).to.eq('5fa2b64c')
   })
 })
 
 describe('Buffer must be align with other languages SDKs', () => {
-  const stringsToHex = arr => Buffer.concat(arr.map(Buffer.from)).toString('hex')
+  const stringsToHex = (arr: string[]): string => Buffer.concat(arr.map(s => Buffer.from(s))).toString('hex')
 
   it('expect have compatible result', async () => {
     expect(stringsToHex([''])).to.eq('')
