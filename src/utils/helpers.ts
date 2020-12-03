@@ -9,14 +9,12 @@ export const isNotSet = (v: any): boolean => {
 
 export const isSet = (v: any): boolean => !isNotSet(v)
 
-export const isEmpty = (v: any): boolean => isNotSet(v) || v === {} || v === ''
-
 export const remove0x = (v: string): string => ['0X', '0x'].includes(v.slice(0, 2)) ? v.slice(2) : v
 
 export const prepend0x = (v: string): string => ['0X', '0x'].includes(v.slice(0, 2)) ? v : `0x${v}`
 
 export const isHex = (v: string): boolean => {
-  if (isEmpty(v)) {
+  if (!v) {
     return false
   }
 

@@ -50,7 +50,7 @@ describe('verifyUserSignature()', function () {
       address: await wallet.getAddress(),
       email: 'a@c',
       scope: 'email',
-      userSignatureTimstamp: 123
+      userSignatureTimestamp: 123
     })
 
     const sig = await wallet.signMessage(payload.messageToSignByUser())

@@ -7,8 +7,8 @@ import * as jwt from 'jsonwebtoken'
 
 import {
   currentTimestamp,
-  isEmpty,
   isEthereumAddress,
+  isNotSet,
   isSet,
   KeyValueInterface,
   xor
@@ -16,9 +16,6 @@ import {
 
 import {JwtPayload} from '../models'
 import {createProvider, Registry} from '../contracts'
-
-// eslint-disable-next-line
-const parser = (v: any): string => isEmpty(v) ? '' : v
 
 /**
  * Generates message to sign based on plain object data (keys and values)
@@ -32,6 +29,9 @@ const parser = (v: any): string => isEmpty(v) ? '' : v
  */
 export const messageToSign = (data: KeyValueInterface = {}): string => {
   const msg: string[] = []
+
+  // eslint-disable-next-line
+  const parser = (v: any): string => isNotSet(v) ? '' : v.toString()
 
   Object.keys(data).sort().forEach(k => {
     if (isSet(data[k])) {
@@ -57,7 +57,7 @@ export const messageToSign = (data: KeyValueInterface = {}): string => {
  * await generateSSORequestParams(domainOwnerPrivateKey, {redirectUrl: 'http://silkey.io', refId: 1});
  */
 export const generateSSORequestParams = async (privateKey: string, params: KeyValueInterface = {}): Promise<KeyValueInterface> => {
-  if (isEmpty(privateKey)) {
+  if (!privateKey) {
     throw Error('`privateKey` is required')
   }
 
@@ -65,19 +65,19 @@ export const generateSSORequestParams = async (privateKey: string, params: KeyVa
 
   const {redirectUrl, cancelUrl, ssoTimestamp, scope} = dataToSign
 
-  if (isEmpty(redirectUrl)) {
+  if (!redirectUrl) {
     throw Error('`redirectUrl` is required')
   }
 
-  if (isEmpty(cancelUrl)) {
+  if (!cancelUrl) {
     throw Error('`cancelUrl` is required')
   }
 
-  if (isEmpty(ssoTimestamp)) {
+  if (!ssoTimestamp) {
     dataToSign.ssoTimestamp = currentTimestamp()
   }
 
-  if (isEmpty(scope)) {
+  if (!scope) {
     dataToSign.scope = 'id'
   }
 
@@ -96,7 +96,7 @@ export const verifyUserSignature = (tokenPayload: KeyValueInterface): boolean =>
   try {
     const payload = JwtPayload.import(tokenPayload)
 
-    if (isEmpty(payload.userSignature) || !payload.userSignatureTimestamp || isEmpty(payload.address)) {
+    if (!payload.userSignature || !payload.userSignatureTimestamp || !payload.address) {
       console.warn('Verification failed, missing user signature/timestamp and/or address')
       return false
     }
@@ -126,11 +126,11 @@ export const verifySilkeySignature = (tokenPayload: KeyValueInterface, silkeyPub
   try {
     const payload = JwtPayload.import(tokenPayload)
 
-    if (isEmpty(payload.email) && isEmpty(payload.silkeySignature)) {
+    if (!payload.email && !payload.silkeySignature) {
       return null
     }
 
-    if (xor(isEmpty(payload.email), isEmpty(payload.silkeySignature))) {
+    if (xor(!payload.email, !payload.silkeySignature)) {
       console.warn('Verification failed, missing silkey signature or email')
       return false
     }

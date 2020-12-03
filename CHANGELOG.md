@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - fix test for `fetchSilkeyPublicKey()`
 
+### Removed
+- remove `isEmpty` method from utils
+
 ## [0.3.2] - 2020-11-26
 ### Added
 - `generateSSORequestParams` throws on empty PK

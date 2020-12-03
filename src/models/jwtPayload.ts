@@ -5,7 +5,6 @@
 import {
   currentTimestamp,
   intToBuffer,
-  isEmpty,
   isEthereumAddress,
   isSignature,
   KeyValueInterface,
@@ -41,18 +40,18 @@ export class JwtPayload implements JwtPayloadI {
   getScope = (): string[] => this.scope.split(SCOPE_DIVIDER)
 
   setScope = (scope: string): JwtPayload => {
-    if (isEmpty(scope)) {
+    if (!scope) {
       return this
     }
 
-    if (isEmpty(this.scope === '')) {
+    if (!this.scope) {
       this.scope = scope
       return this
     }
 
     const map: KeyValueInterface = {}
     const str = `${this.scope}${SCOPE_DIVIDER}${scope}`
-    str.split(SCOPE_DIVIDER).filter(k => !isEmpty(k)).forEach(k => {
+    str.split(SCOPE_DIVIDER).filter(k => !!k).forEach(k => {
       map[k] = k
     })
     this.scope = Object.keys(map).sort().join(SCOPE_DIVIDER)
@@ -75,7 +74,7 @@ export class JwtPayload implements JwtPayloadI {
   }
 
   setRefId = (refId: string): JwtPayload => {
-    if (isEmpty(refId)) {
+    if (!refId) {
       return this
     }
 
@@ -88,7 +87,7 @@ export class JwtPayload implements JwtPayloadI {
       throw Error(`user signature is invalid: ${sig}`)
     }
 
-    if (isEmpty(timestamp)) {
+    if (!timestamp) {
       throw Error(`user signature timestamp is invalid: ${timestamp}`)
     }
 
@@ -102,7 +101,7 @@ export class JwtPayload implements JwtPayloadI {
       throw Error(`silkey signature is invalid: ${sig}`)
     }
 
-    if (isEmpty(timestamp)) {
+    if (!timestamp) {
       throw Error(`silkey signature timestamp is invalid: ${timestamp}`)
     }
 
@@ -119,8 +118,8 @@ export class JwtPayload implements JwtPayloadI {
    * @returns {string}
    */
   messageToSignByUser = (): string => {
-    if (!isEmpty(this.address) && !this.userSignatureTimestamp) {
-      this.userSignatureTimestamp = currentTimestamp()
+    if (!this.address && !this.userSignatureTimestamp) {
+      //this.userSignatureTimestamp = currentTimestamp()
     }
 
     return Buffer.concat([
@@ -143,7 +142,7 @@ export class JwtPayload implements JwtPayloadI {
    * @returns {string}
    */
   messageToSignBySilkey = (): string => {
-    if (isEmpty(this.email)) {
+    if (!this.email) {
       return ''
     }
 
@@ -170,11 +169,11 @@ export class JwtPayload implements JwtPayloadI {
       throw new Error('userSignatureTimestamp is empty')
     }
 
-    if (isEmpty(this.scope) || this.scope === 'id') {
+    if (!this.scope || this.scope === 'id') {
       return this
     }
 
-    if (isEmpty(this.email)) {
+    if (!this.email) {
       throw new Error(`email is invalid: ${this.email}`)
     }
 

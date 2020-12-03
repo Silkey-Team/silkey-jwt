@@ -16,12 +16,12 @@ describe('JwtPayload', () => {
   it('setScope() sets in order', () => {
     const payload = new JwtPayload()
       .setScope('c')
-      .setScope('b')
+      .setScope('b,z')
       .setScope('b')
       .setScope('a')
 
-    expect(payload.scope).to.eql('a,b,c')
-    expect(payload.getScope()).to.eql('a,b,c'.split(','))
+    expect(payload.scope).to.eql('a,b,c,z')
+    expect(payload.getScope()).to.eql('a,b,c,z'.split(','))
   })
 
   describe('.messageToSignByUser()', () => {
