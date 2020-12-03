@@ -28,7 +28,8 @@ describe('JwtPayload', () => {
 
     it('expect to return message for empty object', () => {
       const payload = new JwtPayload()
-      expect(payload.messageToSignByUser()).to.eq('61646472657373726566496473636f7065757365725369676e617475726554696d657374616d7000')
+      expect(payload.messageToSignByUser())
+        .to.eq('61646472657373726566496473636f7065757365725369676e617475726554696d657374616d7000')
     })
 
     it('expect to return message when data is set', () => {
@@ -39,7 +40,8 @@ describe('JwtPayload', () => {
         .setAddress(address)
         .setUserSignature(`0x${'1'.repeat(130)}`, 1234567890)
 
-      expect(payload.messageToSignByUser()).to.eq('6164647265737311111111111111111111111111111111111111117265664964307861626373636f7065656d61696c757365725369676e617475726554696d657374616d70499602d2')
+      expect(payload.messageToSignByUser()).to.eq('616464726573731111111111111111111111111111111111111111' +
+        '7265664964307861626373636f7065656d61696c757365725369676e617475726554696d657374616d70499602d2')
     })
   })
 

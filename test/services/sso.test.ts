@@ -42,7 +42,8 @@ describe('sso', () => {
     it('generates signature for SSO request', async () => {
       const data = {ssoTimestamp: 1602151787, redirectUrl: 'http', cancelUrl: 'http'}
       const params = await generateSSORequestParams(privateKey, data)
-      const sig = '0xb60f9b1f5c9d6e58b5d802a5019f96415ab7b14bea45721d74e0868df48c85080063beffb19a485b0038b1b158c31ddab4dff08458b0d9a9a43da0b3a2abb72b1b'
+      const sig = '0xb60f9b1f5c9d6e58b5d802a5019f96415ab7b14bea45721d74e0868df48c85080063beffb19a485b0038b1b158c31d' +
+        'dab4dff08458b0d9a9a43da0b3a2abb72b1b'
 
       expect(params.signature).to.eq(sig)
       expect(params.ssoTimestamp).to.eq(1602151787)

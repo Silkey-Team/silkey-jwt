@@ -14,7 +14,8 @@ describe('verifyUserSignature()', function () {
   it('expect to return false when user signature NOT valid', function () {
     const payload = JwtPayload.import({
       address: '0xeC147F4bdEF4d1690A98822940548713f91567E4',
-      userSignature: '0x24a1a2156e3bb590f683bdb2ac35e9c0d66006b7d7424229577b2e74e1905ca71fbd10227299e170dba55abc06074001e5cade5dfe68b3e5f5d914106f1d750f1b'
+      userSignature: '0x24a1a2156e3bb590f683bdb2ac35e9c0d66006b7d7424229577b2e74e1905ca71fbd10227299e170dba55abc060' +
+        '74001e5cade5dfe68b3e5f5d914106f1d750f1b'
     })
     expect(verifyUserSignature(payload)).to.be.false
   })
@@ -22,7 +23,8 @@ describe('verifyUserSignature()', function () {
   it('expect to return false when address not set', function () {
     const payload = JwtPayload.import({
       address: '',
-      userSignature: '0x24a1a2156e3bb590f683bdb2ac35e9c0d66006b7d7424229577b2e74e1905ca71fbd10227299e170dba55abc06074001e5cade5dfe68b3e5f5d914106f1d750f1b'
+      userSignature: '0x24a1a2156e3bb590f683bdb2ac35e9c0d66006b7d7424229577b2e74e1905ca71fbd10227299e170dba55abc060' +
+        '74001e5cade5dfe68b3e5f5d914106f1d750f1b'
     })
 
     expect(verifyUserSignature(payload)).to.be.false
@@ -77,7 +79,8 @@ describe('verifySilkeySignature()', function () {
   it('expect to return TRUE', function () {
     const payload = JwtPayload.import({
       email: 'aliasId@privaterelay',
-      silkeySignature: '0x228b203190b5c1f764e3a5a830bf40702fa1ebed3ce67734a38fb40b8da99ce97218238371ca93f3c8501348b520b1a5399f4cf39995ccbcd48b4fffe48aa7ca1b',
+      silkeySignature: '0x228b203190b5c1f764e3a5a830bf40702fa1ebed3ce67734a38fb40b8da99ce97218238371ca93f3c8501348b5' +
+        '20b1a5399f4cf39995ccbcd48b4fffe48aa7ca1b',
       silkeySignatureTimestamp: 1605290733
     })
 
@@ -88,7 +91,8 @@ describe('verifySilkeySignature()', function () {
   it('expect to return FALSE if public key do not match', function () {
     const payload = JwtPayload.import({
       email: 'aliasId@privaterelay',
-      silkeySignature: '0x228b203190b5c1f764e3a5a830bf40702fa1ebed3ce67734a38fb40b8da99ce97218238371ca93f3c8501348b520b1a5399f4cf39995ccbcd48b4fffe48aa7ca1b',
+      silkeySignature: '0x228b203190b5c1f764e3a5a830bf40702fa1ebed3ce67734a38fb40b8da99ce97218238371ca93f3c8501348b' +
+        '520b1a5399f4cf39995ccbcd48b4fffe48aa7ca1b',
       silkeySignatureTimestamp: 1605290733
     })
 

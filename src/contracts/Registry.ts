@@ -1,9 +1,11 @@
-import {ethers, ContractInterface, Contract} from 'ethers'
-import { strToBytes32 } from '../utils/helpers'
+import {Contract, ContractInterface, ethers} from 'ethers'
+import {strToBytes32} from '../utils/helpers'
 import fs from 'fs'
 import path from 'path'
 
-export const createProvider = (providerUri: string | undefined | null): ethers.providers.JsonRpcProvider => {
+export const createProvider = (
+  providerUri: string | undefined
+): ethers.providers.JsonRpcProvider => {
   if (!providerUri) throw Error('Empty web3 provider uri')
 
   return new ethers.providers.JsonRpcProvider(providerUri)

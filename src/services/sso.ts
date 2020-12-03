@@ -5,14 +5,7 @@
 import {ethers} from 'ethers'
 import * as jwt from 'jsonwebtoken'
 
-import {
-  currentTimestamp,
-  isEthereumAddress,
-  isNotSet,
-  isSet,
-  KeyValueInterface,
-  xor
-} from '../utils/helpers'
+import {currentTimestamp, isEthereumAddress, isNotSet, isSet, KeyValueInterface, xor} from '../utils/helpers'
 
 import {JwtPayload} from '../models'
 import {createProvider, Registry} from '../contracts'
@@ -48,7 +41,8 @@ export const messageToSign = (data: KeyValueInterface = {}): string => {
  * @async
  * @method
  * @param privateKey {string} this should be private key of domain owner
- * @param params {{redirectUrl, redirectMethod, cancelUrl, refId, scope, ssoTimestamp}} Object with data: {redirectUrl*, redirectMethod, cancelUrl*, refId, scope, ssoTimestamp}
+ * @param params {{redirectUrl, redirectMethod, cancelUrl, refId, scope, ssoTimestamp}}
+ *  Object with data: {redirectUrl*, redirectMethod, cancelUrl*, refId, scope, ssoTimestamp}
  *  marked with * are required by Silkey SSO
  * @returns {{signature, ssoTimestamp, redirectUrl, refId, scope}}
  * @throws on missing required data
@@ -56,7 +50,9 @@ export const messageToSign = (data: KeyValueInterface = {}): string => {
  * // returns {signature, ssoTimestamp, redirectUrl, refId, scope, redirectMethod}
  * await generateSSORequestParams(domainOwnerPrivateKey, {redirectUrl: 'http://silkey.io', refId: 1});
  */
-export const generateSSORequestParams = async (privateKey: string, params: KeyValueInterface = {}): Promise<KeyValueInterface> => {
+export const generateSSORequestParams = async (
+  privateKey: string, params: KeyValueInterface = {}
+): Promise<KeyValueInterface> => {
   if (!privateKey) {
     throw Error('`privateKey` is required')
   }
@@ -114,15 +110,17 @@ export const verifyUserSignature = (tokenPayload: KeyValueInterface): boolean =>
 }
 
 /**
- * By default we do not check silkey signature (if not provided)
- * as token is provided by silkey itself and therer is no incentives to manipulate with silkey signature
- * But it is strongly recommended to provide silkeyPublicKey and have full validation.
+ * By default we do not check Silkey signature (if not provided) as token is provided by Silkey
+ * itself and there is no incentives to manipulate with Silkey signature
+ * But it is strongly recommended to provide `silkeyPublicKey` and have full validation.
  *
- * @param tokenPayload {string} token returned by silkey
+ * @param tokenPayload {string} token returned by Silkey
  * @param silkeyPublicKey {string | null} optional
  * @return {null|boolean}
  */
-export const verifySilkeySignature = (tokenPayload: KeyValueInterface, silkeyPublicKey: string | null = null): boolean | null => {
+export const verifySilkeySignature = (
+  tokenPayload: KeyValueInterface, silkeyPublicKey: string | null = null
+): boolean | null => {
   try {
     const payload = JwtPayload.import(tokenPayload)
 
@@ -143,7 +141,9 @@ export const verifySilkeySignature = (tokenPayload: KeyValueInterface, silkeyPub
     const signer = ethers.utils.verifyMessage(payload.messageToSignBySilkey(), payload.silkeySignature)
 
     if (!silkeyPublicKey) {
-      console.warn('You are using verification without checking silkey signature. We strongly recommended to turn on full verification. This option can be deprecated in the future')
+      console.warn('You are using verification without checking silkey signature. ' +
+        'We strongly recommended to turn on full verification. ' +
+        'This option can be deprecated in the future')
       return true
     }
 
@@ -160,9 +160,10 @@ export const verifySilkeySignature = (tokenPayload: KeyValueInterface, silkeyPub
 /**
  * Fetches public ethereum Silkey address directly from blockchain
  *
- * @param providerUri {string} ie: 'https://infura.io/v3/:infuraId' register to infura.io to get infuraId
- * @param registryAddress {string} address of silkey smart contract registry, see list of addresses in README#registryAddress
- * @return {Promise<string>} public ethereum address of silkey signer
+ * @param providerUri {string} ie: 'https://infura.io/v3/:infuraId' register to infura.io to get id
+ * @param registryAddress {string} address of silkey smart contract registry,
+ *  see list of addresses in README#registryAddress
+ * @return {Promise<string>} public ethereum address of Silkey signer
  */
 export const fetchSilkeyPublicKey = async (providerUri: string, registryAddress: string): Promise<string> => {
   const provider = createProvider(providerUri)
@@ -184,9 +185,12 @@ export const fetchSilkeyPublicKey = async (providerUri: string, registryAddress:
  * @throws when token is invalid or data are corrupted
  * @example
  * // returns {JwtPayload}
- * tokenPayloadVerifier('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
+ * tokenPayloadVerifier('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0
+ *  IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
  */
-export const tokenPayloadVerifier = (token: string, silkeyPublicKey: string | null = null): JwtPayload | null => {
+export const tokenPayloadVerifier = (
+  token: string, silkeyPublicKey: string | null = null
+): JwtPayload | null => {
   try {
     const tokenPayload = jwt.decode(token)
 
