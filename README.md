@@ -9,6 +9,10 @@ SDK package for integrate with Silkey standard of Decentralised SSO.
 
 [See list of all available methods](./DOCS.md).
 
+## SDK for other platforms
+
+- [Silkey SDK for Ruby](https://rubygems.org/gems/silkey-sdk) [![Gem Version](https://badge.fury.io/rb/silkey-sdk.svg)](https://badge.fury.io/rb/silkey-sdk)
+
 ## Smart Contracts
 
 ### registryAddress
@@ -167,7 +171,3 @@ if (jwtPayload === null) {
 - `userSignatureTimestamp`: users' signature timestamp, 
 - `silkeySignature`: only when email is present, proof that Silkey verified `email`
 - `silkeySignatureTimestamp`: timestamp of signature
-
-## SDK for other platforms
-
-- [Silkey SDK for Ruby](https://rubygems.org/gems/silkey-sdk) [![Gem Version](https://badge.fury.io/rb/silkey-sdk.svg)](https://badge.fury.io/rb/silkey-sdk)
