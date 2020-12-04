@@ -147,6 +147,6 @@ Creates message that's need to be sign by user
 <a name="module_JwtPayload..JwtPayload+messageToSignBySilkey"></a>
 
 #### jwtPayload.messageToSignBySilkey() ⇒ <code>string</code>
-Creates message that's need to be sign by silkey
+Creates message that's need to be sign by Silkey
 
 **Kind**: instance method of [<code>JwtPayload</code>](#module_JwtPayload..JwtPayload)  
