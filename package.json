@@ -19,7 +19,7 @@
     "build": "npm run clean && npm run compile && npm run copy:assets",
     "test": "npx mocha --require ts-node/register --ui bdd 'test/**/*.test.ts'",
     "prepare": "npm run build",
-    "doc": "jsdoc2md src/sso.js > DOCS.md",
+    "doc": "npm run build && jsdoc2md dist/services/sso.js dist/models/JwtPayload.js > DOCS.md",
     "git:amend": "git commit --amend --no-edit && git push --force",
     "pre-push": "npm run clean && npm run lint && npm run build && npm run doc && npm run test"
   },

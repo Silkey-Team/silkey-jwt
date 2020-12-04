@@ -28,6 +28,7 @@ export const messageToSign = (data: KeyValueInterface = {}): string => {
 
   Object.keys(data).sort().forEach(k => {
     if (isSet(data[k])) {
+      // empty strings included
       msg.push(`${k}=${parser(data[k])}`)
     }
   })
@@ -58,7 +59,6 @@ export const generateSSORequestParams = async (
   }
 
   const dataToSign = {...params}
-
   const {redirectUrl, cancelUrl, ssoTimestamp, scope} = dataToSign
 
   if (!redirectUrl) {
@@ -115,7 +115,7 @@ export const verifyUserSignature = (tokenPayload: KeyValueInterface): boolean =>
  * But it is strongly recommended to provide `silkeyPublicKey` and have full validation.
  *
  * @param tokenPayload {string} token returned by Silkey
- * @param silkeyPublicKey {string | null} optional
+ * @param silkeyPublicKey {string|null} optional
  * @return {null|boolean}
  */
 export const verifySilkeySignature = (

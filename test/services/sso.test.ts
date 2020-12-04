@@ -117,7 +117,7 @@ describe('sso', () => {
 
     it('generates same signature for same data', async () => {
       const f = () => generateSSORequestParams(privateKey, {
-        timestamp: t,
+        ssoTimestamp: t,
         redirectUrl: 'https://silkey.io/',
         cancelUrl: 'https://silkey.io/fail',
         refId: 123,

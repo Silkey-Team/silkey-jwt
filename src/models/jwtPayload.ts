@@ -1,5 +1,5 @@
 /**
- * @module JwtPayloadModel
+ * @module JwtPayload
  */
 
 import {
@@ -22,10 +22,22 @@ export interface JwtPayloadI {
   silkeySignature: string
   userSignatureTimestamp: number
   userSignature: string
+  // websiteSignature: string
 }
 
 /**
- * @constructor
+ * @typedef JwtPayload
+ * @type {object}
+ * @property {string} email - verified email of the user,
+ *  IMPORTANT: if email in user profile is different, you should always update it with this one.
+ * @property {string} address - ID of the user, this is also valid ethereum address, use this to identify user
+ * @property {string} address - ID of the user, this is also valid ethereum address, use this to identify user
+ * @property {string} userSignature - proof that request came from the user
+ * @property {number} userSignatureTimestamp - time when signature was crated
+ * @property {string} silkeySignature - proof that Silkey verified the email
+ * @property {number} silkeySignatureTimestamp - time when signature was crated
+ * @property {string} scope
+ * @property {string} refId
  */
 export class JwtPayload implements JwtPayloadI {
   public email = ''
@@ -135,7 +147,7 @@ export class JwtPayload implements JwtPayloadI {
   }
 
   /**
-   * Creates message that's need to be sign by silkey
+   * Creates message that's need to be sign by Silkey
    *
    * @method
    *
