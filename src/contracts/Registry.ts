@@ -1,7 +1,6 @@
-import {Contract, ContractInterface, ethers} from 'ethers'
+import {Contract, ethers} from 'ethers'
 import {strToBytes32} from '../utils/helpers'
-import fs from 'fs'
-import path from 'path'
+import {registryAbi} from './abi/registry.abi'
 
 export const createProvider = (
   providerUri: string | undefined
@@ -12,11 +11,10 @@ export const createProvider = (
 }
 
 export class Registry {
-  static ABI: ContractInterface = fs.readFileSync(path.resolve(__dirname, './abi/registry.abi.json'), 'utf-8');
   private contract: Contract
 
   constructor(provider: ethers.providers.JsonRpcProvider, address: string) {
-    this.contract = new ethers.Contract(address, Registry.ABI, provider)
+    this.contract = new ethers.Contract(address, registryAbi, provider)
   }
 
   getAddress = async (name: string): Promise<string> => this.contract.getAddress(strToBytes32(name))
