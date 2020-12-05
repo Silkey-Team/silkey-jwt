@@ -105,7 +105,7 @@ The Production
 #### On SignIn page
 
 ```javascript
-import silkeySdk from "@silkey/sdk";
+import * as silkeySdk from "@silkey/sdk";
 
 // The needed data varaibles are:
 // redirectUrl: Where the user is redirected after auth
@@ -140,7 +140,7 @@ Object.entries(requestParams).forEach(([key, param]) => {
 `token` - get if from request params (it can be send via POST or GET, based on `redirectMethod`) 
 
 ```javascript
-import silkeySdk from "@silkey/sdk";
+import * as silkeySdk from "@silkey/sdk";
 
 // providerUri: A web3 provider URI. ie: 'https://infura.io/v3/:infuraId' register at infura.io to get infuraId
 // registryAddress: Address of silkey smart contract registry, see list of addresses in the registryAddress section of README.md

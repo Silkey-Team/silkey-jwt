@@ -9,7 +9,7 @@ import {
   tokenPayloadVerifier
 } from './services/sso.js'
 
-export default {
+export {
   Models,
   utils,
   blockchain,
