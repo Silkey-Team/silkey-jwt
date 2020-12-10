@@ -59,13 +59,22 @@ describe('JwtPayload', () => {
     })
   })
 
-  it('setUserSignature()', () => {
-    const payload = new JwtPayload().setUserSignature('0'.repeat(130), timestamp)
-    expect(payload.userSignature).to.eq('0'.repeat(130))
+  describe('.set_Signature()', () => {
+    it('setUserSignature', () => {
+      const payload = new JwtPayload().setUserSignature('0'.repeat(130), timestamp)
+      expect(payload.userSignature).to.eq('0'.repeat(130))
+      expect(payload.userSignatureTimestamp).to.eq(timestamp)
+    })
+
+    it('setSilkeySignature', () => {
+      const payload = new JwtPayload()
+      payload.setSilkeySignature('0'.repeat(130), timestamp)
+      expect(payload.silkeySignature).to.eq('0'.repeat(130))
+      expect(payload.silkeySignatureTimestamp).to.eq(timestamp)
+    })
   })
 
   describe('.export()', () => {
-
     it('exports data without silkey sig', () => {
       const payload = new JwtPayload()
         .setUserSignature(('0'.repeat(130)), timestamp)
@@ -78,16 +87,20 @@ describe('JwtPayload', () => {
     })
 
     it('exports data wth silkey sig', () => {
+      const sig = '0'.repeat(130)
+
       const payload = new JwtPayload()
-        .setUserSignature(('0'.repeat(130)), timestamp)
-        .setSilkeySignature(('0'.repeat(130)), timestamp)
+        .setUserSignature(sig, timestamp)
+        .setSilkeySignature(sig, timestamp)
         .setRefId('id')
         .export()
 
       expect(payload).not.to.be.instanceOf(JwtPayload)
       expect(payload.refId).to.eq('id')
-      expect(payload.silkeySignature).not.be.undefined
-      expect(payload.silkeySignatureTimestamp).not.be.undefined
+      expect(payload.silkeySignature).to.eq(sig)
+      expect(payload.userSignature).to.eq(sig)
+      expect(payload.silkeySignatureTimestamp).to.eq(timestamp)
+      expect(payload.userSignatureTimestamp).to.eq(timestamp)
     })
   })
 
