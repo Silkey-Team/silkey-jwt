@@ -24,22 +24,21 @@ SDK package for integrate with Silkey standard of Decentralised SSO.
 
 Redirect user to Silkey with parameters:
 
-| Parameter        | Required  | Type     | Desc 
-| ---------------- |:---------:| -------- | ----- 
-| signature        | yes       | string   | Domain owner signature
-| ssoTimestamp     | yes       | number   | Time of signing SSO request
-| redirectUrl      | yes       | string   | Where to redirect user with token after sign in
-| cancelUrl        | yes       | string   | Where to redirect user on error
-| redirectMethod   | no        | GET/POST | How to redirect user after sign in, default is POST
-| refId            | no        | string   | It will be return with user token, you may use it to identify request
-| scope            | no        | string   | Scope of data to return in a token payload: `id` (default) returns only user address, `email` returns address + email
+| Parameter           | Required  | Type     | Desc 
+| ------------------- |:---------:| -------- | ----- 
+| ssoSignature        | yes       | string   | Domain owner signature
+| ssoTimestamp        | yes       | number   | Time of signing SSO request
+| ssoRedirectUrl      | yes       | string   | Where to redirect user with token after sign in
+| ssoCancelUrl        | yes       | string   | Where to redirect user on error
+| ssoRedirectMethod   | no        | GET/POST | How to redirect user after sign in, default is POST
+| ssoRefId            | no        | string   | It will be return with user token, you may use it to identify request
+| ssoScope            | no        | string   | Scope of data to return in a token payload: `id` (default) returns only user address, `email` returns address + email
 
 
 #### Redirect URLs
 
 - Live: soon
 - Sandbox: https://athena-sandbox.silkey.io
-
 
 When user back to you page with JWT token, validate it and login user.
 
@@ -105,21 +104,22 @@ The Production
 #### On SignIn page
 
 ```javascript
-import * as silkeySdk from "@silkey/sdk";
+import silkeySdk from "@silkey/sdk";
 
 // The needed data varaibles are:
-// redirectUrl: Where the user is redirected after auth
-// cancelUrl: Where the user is redirected if they cancel authentication
-// scope: "email" or "id" email if you want access to the users email, otherwise id
-// refId: (optional) This data will be returned to the program after authentication, and can be used to track previous actions before signup
+// ssoRedirectUrl: Where the user is redirected after auth
+// ssoCancelUrl: Where the user is redirected if they cancel authentication
+// ssoScope: "email" or "id" email if you want access to the users email, otherwise id
+// ssoRefId: (optional) This data will be returned to the program after authentication, 
+//   and can be used to track previous actions before signup
 // ssoTimestamp: (Optional) Time when params were generated, will be automatically generated if not present
 
 // Example:
 const requestParams = silkeySdk.generateSSORequestParams(privateKey, {
-  redirectUrl: "https://domain/callback",
-  cancelUrl: "https://domain/cancel",
-  scope: "email",
-  refId: "54321",
+  ssoRedirectUrl: "https://domain/callback",
+  ssoCancelUrl: "https://domain/cancel",
+  ssoScope: "email",
+  ssoRefId: "54321",
 });
 
 // Add the generated params to silkey url as queryString.
@@ -137,37 +137,74 @@ Object.entries(requestParams).forEach(([key, param]) => {
 
 #### On Callback Page 
 
-`token` - get if from request params (it can be send via POST or GET, based on `redirectMethod`) 
+Callback will be done via POST (default) or GET, based on `ssoRedirectMethod`.
+
+Callback params contains all sso parameters that were used to make SSO call + `token`.
+
+`token` - get if from request params
+
+`ssoRequestParams` - get if from request params (it can be send via POST or GET, based on `ssoRedirectMethod`) 
 
 ```javascript
-import * as silkeySdk from "@silkey/sdk";
+import silkeySdk from "@silkey/sdk";
 
 // providerUri: A web3 provider URI. ie: 'https://infura.io/v3/:infuraId' register at infura.io to get infuraId
 // registryAddress: Address of silkey smart contract registry, see list of addresses in the registryAddress section of README.md
-const silkeyPublicKey = await silkeySdk.fetchSilkeyPublicKey(providerUri, registryAddress);
+const silkeyEthAddress = await silkeySdk.fetchSilkeyEthAddress(providerUri, registryAddress);
 
-// token: The token returned by Athena
-const token = new URL(window.location).searchParams.get("token");
+// this simple example is for GET method, we recommend using POST as `ssoRedirectMethod`
+const callbackParams = new URL(window.location).searchParams;
 
-// Using silkeyPublicKey is optional but recomended for scope=email
-const jwtPayload = silkeySdk.tokenPayloadVerifier(token, silkeyPublicKey);
+const {token} = callbackParams;
+
+// Using silkeyEthAddress is optional but recomended for ssoScope=email
+const jwtPayload = silkeySdk.tokenPayloadVerifier(token, callbackParams, 'websiteOwnerEthAddress', silkeyEthAddress);
 
 if (jwtPayload === null) {
   // authorization failed
 } else {
-  const { address, email, refId } = jwtPayload;
+  const { address, email, migration } = jwtPayload;
   // address - use this as ID of the user
-  // you are ready to go...
+
+  if (migration) {
+    // do migration: see Migration section of this document
+  } else {
+    // login or sign in user as usual
+  }
 }
 ```
 
-`jwtPayload` is type of `silkeySdk.Models.JwtPayload`, object properties:
+`jwtPayload` is type of `silkeySdk.Models.JwtPayload`, [see details for properties](./DOCS.md) :
 
-- `scope`: value from request
-- `refId`: value from request
-- `address`: ID of the user (also valid ethereum address)
-- `email`: present when `scope=email`, `email` is verified by Silkey, no need for additional verification
-- `userSignature`: users' signature, 
-- `userSignatureTimestamp`: users' signature timestamp, 
-- `silkeySignature`: only when email is present, proof that Silkey verified `email`
-- `silkeySignatureTimestamp`: timestamp of signature
+## Recommendations
+
+Each time you get user token, you should check is user data are up to date. 
+
+Currently, we only support `scope:email` so you should check if email in token payload changed. 
+If yes, you should update it, because old email might be not valid any more.
+
+## Migration
+
+Migration process assumes, that your website is already prepared to *Sing in With Silkey*.
+
+When user already has account on your website, he can migrate to Silkey and use *Sing in With Silkey* from now on.
+
+Migration process can vary and it depends entirely on how your website operates. 
+But this is the general flow how it should look like:
+
+1. User click *Sign In with Silkey* on your website as usual. Nothing changes here.
+1. When user get back to you with a token, you need to run migration check:
+    ```javascript
+   const { migration } = jwtPayload;
+
+   if (migration) {
+     // do migration
+   } else {
+     // login or sign in user as usual
+   }
+   ```
+1. When you detect that this is a migration, you need to do the following:
+    1. store token in current user session
+    1. redirect user to login page but **hide Silkey option** - user must login to his account using his current credentials
+    1. when user logins in, update user profile with Silkey ID from the token
+    1. migration is over - from now user will be able to login with Silkey.

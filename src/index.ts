@@ -1,20 +1,13 @@
-import * as Models from './models'
-import * as utils from './utils/helpers'
-import * as blockchain from './contracts'
+export * as Models from './models'
+export * as utils from './utils/helpers'
+export * as blockchain from './contracts'
+export {Verifier} from './services/Verifier'
+export {settings} from './config/settings' // do not change path!
 
-import {
-  fetchSilkeyPublicKey,
+export {
+  fetchSilkeyEthAddress,
   generateSSORequestParams,
   messageToSign,
   tokenPayloadVerifier
-} from './services/sso.js'
+} from './services/sso'
 
-export {
-  Models,
-  utils,
-  blockchain,
-  generateSSORequestParams,
-  tokenPayloadVerifier,
-  messageToSign,
-  fetchSilkeyPublicKey
-}

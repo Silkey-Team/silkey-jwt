@@ -25,23 +25,27 @@ describe('JwtPayload', () => {
   })
 
   describe('.messageToSignByUser()', () => {
+    it('expect message to include migration flag', () => {
+      const msg = Buffer.from(new JwtPayload().messageToSignByUser(), 'hex').toString('utf-8')
+      expect(msg).to.eq('addressmigration\u0000scopeuserSignatureTimestamp\u0000')
+    })
 
     it('expect to return message for empty object', () => {
       const payload = new JwtPayload()
+
       expect(payload.messageToSignByUser())
-        .to.eq('61646472657373726566496473636f7065757365725369676e617475726554696d657374616d7000')
+        .to.eq('616464726573736d6967726174696f6e0073636f7065757365725369676e617475726554696d657374616d7000')
     })
 
     it('expect to return message when data is set', () => {
       const payload = new JwtPayload()
-        .setRefId('0xabc')
         .setEmail('a@b.c')
         .setScope('email')
         .setAddress(address)
         .setUserSignature(`0x${'1'.repeat(130)}`, 1234567890)
 
       expect(payload.messageToSignByUser()).to.eq('616464726573731111111111111111111111111111111111111111' +
-        '7265664964307861626373636f7065656d61696c757365725369676e617475726554696d657374616d70499602d2')
+        '6d6967726174696f6e0073636f7065656d61696c757365725369676e617475726554696d657374616d70499602d2')
     })
   })
 
@@ -78,11 +82,9 @@ describe('JwtPayload', () => {
     it('exports data without silkey sig', () => {
       const payload = new JwtPayload()
         .setUserSignature(('0'.repeat(130)), timestamp)
-        .setRefId('id')
         .export()
 
       expect(payload).not.to.be.instanceOf(JwtPayload)
-      expect(payload.refId).to.eq('id')
       expect(payload.userSignatureTimestamp).not.be.undefined
     })
 
@@ -92,11 +94,9 @@ describe('JwtPayload', () => {
       const payload = new JwtPayload()
         .setUserSignature(sig, timestamp)
         .setSilkeySignature(sig, timestamp)
-        .setRefId('id')
         .export()
 
       expect(payload).not.to.be.instanceOf(JwtPayload)
-      expect(payload.refId).to.eq('id')
       expect(payload.silkeySignature).to.eq(sig)
       expect(payload.userSignature).to.eq(sig)
       expect(payload.silkeySignatureTimestamp).to.eq(timestamp)
@@ -161,15 +161,24 @@ describe('JwtPayload', () => {
         assert.doesNotThrow(() => payload.validate())
       })
     })
+  })
 
-    describe('.import()', () => {
-      it('creates JwtPayload object from standard object', () => {
-        const payload = JwtPayload.import({userSignature: 1, silkeySignature: 3})
+  describe('.import()', () => {
+    it('creates JwtPayload object from standard object', () => {
+      const payload = JwtPayload.import({userSignature: 1, silkeySignature: 3})
 
-        expect(payload).to.be.instanceOf(JwtPayload)
-        expect(payload.userSignature).to.eq(1)
-        expect(payload.silkeySignature).to.eq(3)
-      })
+      expect(payload).to.be.instanceOf(JwtPayload)
+      expect(payload.userSignature).to.eq(1)
+      expect(payload.silkeySignature).to.eq(3)
+    })
+
+    it('can NOT be reference to original object', () => {
+      const ori = new JwtPayload().setScope('email')
+      const payload = JwtPayload.import(ori)
+      payload.setScope('id')
+
+      expect(ori.scope).to.eq('email')
+      expect(payload.scope).to.eq('email,id')
     })
   })
 })
