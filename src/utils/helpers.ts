@@ -1,7 +1,3 @@
-export interface KeyValueInterface {
-  [key: string]: any
-}
-
 export const isNotSet = (v: any): boolean => {
   // eslint-disable-next-line valid-typeof
   return v === null || typeof v === 'undefined' || typeof v === undefined
@@ -35,7 +31,15 @@ export const isPrivateKey = (v: string): boolean => isHex(v) && remove0x(v).leng
 
 export const isEthereumAddress = (v: string): boolean => isHex(v) && remove0x(v).length === 40 && !isZeroHex(v)
 
-export const isSignature = (sig: string): boolean => isHex(sig) && remove0x(sig).length === 130 && !isZeroHex(sig)
+export const isSignature = (sig: string | undefined): boolean => {
+  if (!sig) {
+    return false
+  }
+
+  return isHex(sig) && remove0x(sig).length === 130 && !isZeroHex(sig)
+}
+
+export const isTimestamp = (t: number): boolean => t > 0 && t.toString(10).length === 10
 
 export const intToBuffer = (i: number): Buffer => {
   const hex = i.toString(16)
@@ -47,3 +51,6 @@ export const strToBytes32 = (str: string): string => '0x' + Buffer.from(str).toS
 export const currentTimestamp = (): number => Math.round(Date.now() / 1000)
 
 export const xor = (a: boolean, b: boolean): boolean => !(a == b)
+
+// eslint-disable-next-line
+export const getKeyValue = <T extends object, U extends keyof T>(obj: T) => (key: string) => obj[key as keyof T]

@@ -7,23 +7,14 @@ import {
   intToBuffer,
   isEthereumAddress,
   isSignature,
-  KeyValueInterface,
+  isTimestamp,
   remove0x
 } from '../utils/helpers'
+import {settings} from '../config/settings' // do not change path!
+import {JwtPayloadI, KeyValueI} from './'
 
-export const SCOPE_DIVIDER = ','
+const {SCOPE_DIVIDER} = settings.ssoParams
 
-export interface JwtPayloadI {
-  email: string
-  refId: string
-  scope: string
-  address: string
-  silkeySignatureTimestamp: number
-  silkeySignature: string
-  userSignatureTimestamp: number
-  userSignature: string
-  // websiteSignature: string
-}
 
 /**
  * @typedef JwtPayload
@@ -31,25 +22,29 @@ export interface JwtPayloadI {
  * @property {string} email - verified email of the user,
  *  IMPORTANT: if email in user profile is different, you should always update it with this one.
  * @property {string} address - ID of the user, this is also valid ethereum address, use this to identify user
- * @property {string} address - ID of the user, this is also valid ethereum address, use this to identify user
  * @property {string} userSignature - proof that request came from the user
  * @property {number} userSignatureTimestamp - time when signature was crated
  * @property {string} silkeySignature - proof that Silkey verified the email
  * @property {number} silkeySignatureTimestamp - time when signature was crated
  * @property {string} scope
- * @property {string} refId
+ * @property {boolean} migration - if user started migration to Silkey, this will be true
  */
 export class JwtPayload implements JwtPayloadI {
   public email = ''
-  public refId = ''
+  public scope = ''
   public address = ''
   public silkeySignatureTimestamp = 0
   public silkeySignature = ''
   public userSignatureTimestamp = 0
   public userSignature = ''
-  public scope = ''
+  public migration = false
 
   getScope = (): string[] => this.scope.split(SCOPE_DIVIDER)
+
+  setMigration = (status: boolean): JwtPayload => {
+    this.migration = status
+    return this
+  }
 
   setScope = (scope: string): JwtPayload => {
     if (!scope) {
@@ -61,7 +56,7 @@ export class JwtPayload implements JwtPayloadI {
       return this
     }
 
-    const map: KeyValueInterface = {}
+    const map: KeyValueI = {}
     const str = `${this.scope}${SCOPE_DIVIDER}${scope}`
     str.split(SCOPE_DIVIDER).filter(k => !!k).forEach(k => {
       map[k] = k
@@ -82,15 +77,6 @@ export class JwtPayload implements JwtPayloadI {
 
   setEmail = (email: string): JwtPayload => {
     this.email = email
-    return this
-  }
-
-  setRefId = (refId: string): JwtPayload => {
-    if (!refId) {
-      return this
-    }
-
-    this.refId = refId
     return this
   }
 
@@ -134,16 +120,17 @@ export class JwtPayload implements JwtPayloadI {
       //this.userSignatureTimestamp = currentTimestamp()
     }
 
-    return Buffer.concat([
-      Buffer.from('address'),
-      Buffer.from(remove0x(this.address.toLowerCase()), 'hex'),
-      Buffer.from('refId'),
-      Buffer.from(this.refId.toString()),
-      Buffer.from('scope'),
-      Buffer.from(this.scope),
-      Buffer.from('userSignatureTimestamp'),
-      intToBuffer(this.userSignatureTimestamp)
-    ]).toString('hex')
+    const data: KeyValueI = {
+      'address': Buffer.concat([Buffer.from('address'), Buffer.from(remove0x(this.address.toLowerCase()), 'hex')]),
+      'scope': Buffer.concat([Buffer.from('scope'), Buffer.from(this.scope)]),
+      'migration': Buffer.concat([Buffer.from('migration'), Buffer.from(this.migration ? '01' : '00', 'hex')]),
+      'userSignatureTimestamp':
+        Buffer.concat([Buffer.from('userSignatureTimestamp'), intToBuffer(this.userSignatureTimestamp)])
+    }
+
+    return Buffer.concat(Object.keys(data).sort().map(k => {
+      return data[k]
+    })).toString('hex')
   }
 
   /**
@@ -177,8 +164,8 @@ export class JwtPayload implements JwtPayloadI {
       throw new Error(`userSignature is invalid: ${this.userSignature}`)
     }
 
-    if (!this.userSignatureTimestamp) {
-      throw new Error('userSignatureTimestamp is empty')
+    if (!isTimestamp(this.userSignatureTimestamp)) {
+      throw new Error(`userSignatureTimestamp is invalid: ${this.userSignatureTimestamp}`)
     }
 
     if (!this.scope || this.scope === 'id') {
@@ -193,7 +180,7 @@ export class JwtPayload implements JwtPayloadI {
       throw new Error(`silkeySignature is invalid: ${this.silkeySignature}`)
     }
 
-    if (!this.silkeySignatureTimestamp) {
+    if (!isTimestamp(this.silkeySignatureTimestamp)) {
       throw new Error(`silkeySignatureTimestamp is invalid: ${this.silkeySignatureTimestamp}`)
     }
 
@@ -201,10 +188,10 @@ export class JwtPayload implements JwtPayloadI {
   }
 
   export = (): JwtPayloadI => {
-    return (<any>Object).assign({}, this)
+    return JSON.parse(JSON.stringify(this))
   }
 
-  static import = (obj: KeyValueInterface = {}): JwtPayload => {
-    return (<any>Object).assign(new JwtPayload(), obj)
+  static import = (obj: JwtPayload | JwtPayloadI | KeyValueI = {}): JwtPayload => {
+    return (<any>Object).assign(new JwtPayload(), obj instanceof JwtPayload ? obj.export() : obj)
   }
 }
