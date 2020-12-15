@@ -1,6 +1,6 @@
 import {JwtPayload, SSOParamsI, KeyValueI} from '../models'
 import {settings} from '../config/settings' // do not change path!
-import {currentTimestamp, getKeyValue, xor} from '../utils/helpers'
+import {currentTimestamp, getKeyValue, prepend0x, xor} from '../utils/helpers'
 import {ethers} from 'ethers'
 import {messageToSign} from './sso'
 
@@ -44,7 +44,7 @@ export class Verifier {
       }
 
       const message = messageToSign(ssoParams)
-      const signer = ethers.utils.verifyMessage(message, ssoParams.ssoSignature)
+      const signer = ethers.utils.verifyMessage(message, prepend0x(ssoParams.ssoSignature))
 
       if (websiteOwnerAddress.toLowerCase() !== signer.toLowerCase()) {
         console.warn(`verifyWebsiteSignature: expect ${websiteOwnerAddress} but got ${signer}`)

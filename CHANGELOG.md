@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - website signature
 - support for migration
 - `jwt` and `queryParams` config moved from toolbox
+- prepend `0x` when verifying signed message, to avoid `signature missing v and recoveryParam`
 
 ### Changed
 - all SSO params have prefix `sso`
