@@ -14,9 +14,8 @@
 * [SilkeySDK](#module_SilkeySDK)
     * [~messageToSign(data)](#module_SilkeySDK..messageToSign) ⇒ <code>string</code>
     * [~generateSSORequestParams(privateKey, params)](#module_SilkeySDK..generateSSORequestParams) ⇒ <code>Object</code>
-    * [~verifySilkeySignature(tokenPayload, silkeyPublicKey)](#module_SilkeySDK..verifySilkeySignature) ⇒ <code>null</code> \| <code>boolean</code>
-    * [~fetchSilkeyPublicKey(providerUri, registryAddress)](#module_SilkeySDK..fetchSilkeyPublicKey) ⇒ <code>Promise.&lt;string&gt;</code>
-    * [~tokenPayloadVerifier(token, silkeyPublicKey)](#module_SilkeySDK..tokenPayloadVerifier) ⇒ <code>JwtPayload</code> \| <code>null</code>
+    * [~fetchSilkeyEthAddress(providerUri, registryAddress)](#module_SilkeySDK..fetchSilkeyEthAddress) ⇒ <code>Promise.&lt;string&gt;</code>
+    * [~tokenPayloadVerifier(token, callbackParams, websiteOwnerAddress, silkeyEthAddress, tokenExpirationTime)](#module_SilkeySDK..tokenPayloadVerifier) ⇒ <code>JwtPayload</code> \| <code>null</code>
 
 <a name="module_SilkeySDK..messageToSign"></a>
 
@@ -31,8 +30,8 @@ Generates message to sign based on plain object data (keys and values)
 
 **Example**  
 ```js
-messageToSign({redirectUrl: 'http://silkey.io', refId: 1});
-// returns 'redirectUrl=http://silkey.io::refId=1'
+messageToSign({ssoRedirectUrl: 'http://silkey.io', ssoRefId: 1});
+// returns 'ssoRedirectUrl=http://silkey.io::ssoRefId=1'
 ```
 <a name="module_SilkeySDK..generateSSORequestParams"></a>
 
@@ -48,30 +47,16 @@ Generates all needed parameters (including signature) for requesting Silkey SSO
 | Param | Type | Description |
 | --- | --- | --- |
 | privateKey | <code>string</code> | this should be private key of domain owner |
-| params | <code>Object</code> | Object with data: {redirectUrl*, redirectMethod, cancelUrl*, refId, scope, ssoTimestamp}  marked with * are required by Silkey SSO |
+| params | <code>SSOParamsI</code> \| <code>KeyValueI</code> | Object with data: {ssoRedirectUrl*, .ssoRedirectMethod, ssoCancelUrl*, ssoRefId, ssoScope, ssoTimestamp}  marked with * are required by Silkey SSO |
 
 **Example**  
 ```js
-// returns {signature, ssoTimestamp, redirectUrl, refId, scope, redirectMethod}
-await generateSSORequestParams(domainOwnerPrivateKey, {redirectUrl: 'http://silkey.io', refId: 1});
+// returns {ssoSignature, ssoTimestamp, ssoRedirectUrl, ssoRefId, ssoScope, ssoRedirectMethod}
+await generateSSORequestParams(domainOwnerPrivateKey, {ssoRedirectUrl: 'http://silkey.io', ssoRefId: 1});
 ```
-<a name="module_SilkeySDK..verifySilkeySignature"></a>
+<a name="module_SilkeySDK..fetchSilkeyEthAddress"></a>
 
-### SilkeySDK~verifySilkeySignature(tokenPayload, silkeyPublicKey) ⇒ <code>null</code> \| <code>boolean</code>
-By default we do not check Silkey signature (if not provided) as token is provided by Silkey
-itself and there is no incentives to manipulate with Silkey signature
-But it is strongly recommended to provide `silkeyPublicKey` and have full validation.
-
-**Kind**: inner method of [<code>SilkeySDK</code>](#module_SilkeySDK)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| tokenPayload | <code>string</code> |  | token returned by Silkey |
-| silkeyPublicKey | <code>string</code> \| <code>null</code> | <code>null</code> | optional |
-
-<a name="module_SilkeySDK..fetchSilkeyPublicKey"></a>
-
-### SilkeySDK~fetchSilkeyPublicKey(providerUri, registryAddress) ⇒ <code>Promise.&lt;string&gt;</code>
+### SilkeySDK~fetchSilkeyEthAddress(providerUri, registryAddress) ⇒ <code>Promise.&lt;string&gt;</code>
 Fetches public ethereum Silkey address directly from blockchain
 
 **Kind**: inner method of [<code>SilkeySDK</code>](#module_SilkeySDK)  
@@ -84,7 +69,7 @@ Fetches public ethereum Silkey address directly from blockchain
 
 <a name="module_SilkeySDK..tokenPayloadVerifier"></a>
 
-### SilkeySDK~tokenPayloadVerifier(token, silkeyPublicKey) ⇒ <code>JwtPayload</code> \| <code>null</code>
+### SilkeySDK~tokenPayloadVerifier(token, callbackParams, websiteOwnerAddress, silkeyEthAddress, tokenExpirationTime) ⇒ <code>JwtPayload</code> \| <code>null</code>
 Verifies JWT token payload
 
 **Kind**: inner method of [<code>SilkeySDK</code>](#module_SilkeySDK)  
@@ -97,8 +82,11 @@ Verifies JWT token payload
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| token | <code>string</code> |  | JWT token returned by Silkey |
-| silkeyPublicKey | <code>string</code> | <code>null</code> | public ethereum address of Silkey |
+| token | <code>string</code> |  | secret JWT token returned by Silkey, this token CAN NOT BE SHARED as it is like user password  they are all returned back to you when user being authenticated |
+| callbackParams |  |  |  |
+| websiteOwnerAddress |  |  |  |
+| silkeyEthAddress | <code>string</code> |  | public ethereum address of Silkey |
+| tokenExpirationTime | <code>number</code> | <code>30</code> | max age of token in seconds, same token can be used to sign in many times,   however from security perspective we should not allow for that case, because when somebody else steal token,   he can access user account. That's why we should set expiration time. By deefault it iss set to 30 sec.   When you pass 0 token will be always accepted. |
 
 **Example**  
 ```js
@@ -125,13 +113,12 @@ tokenPayloadVerifier('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3O
 | --- | --- | --- |
 | email | <code>string</code> | verified email of the user,  IMPORTANT: if email in user profile is different, you should always update it with this one. |
 | address | <code>string</code> | ID of the user, this is also valid ethereum address, use this to identify user |
-| address | <code>string</code> | ID of the user, this is also valid ethereum address, use this to identify user |
 | userSignature | <code>string</code> | proof that request came from the user |
 | userSignatureTimestamp | <code>number</code> | time when signature was crated |
 | silkeySignature | <code>string</code> | proof that Silkey verified the email |
 | silkeySignatureTimestamp | <code>number</code> | time when signature was crated |
 | scope | <code>string</code> |  |
-| refId | <code>string</code> |  |
+| migration | <code>boolean</code> | if user started migration to Silkey, this will be true |
 
 
 * [~JwtPayload](#module_JwtPayload..JwtPayload) : <code>object</code>
