@@ -91,15 +91,17 @@ The Production
     - Login with metamask
     - Click on Register Domain and enter domain of your application
     - Click "Connect Existing Wallet" to use the metamask account
+    - Generate a manifest that is an example authentication call and serve it at [your domain]/silkey.json
+    - Make sure to allow CORS from the Apollo url so we can verify/use the manifest
     - Generate a challenge and add it into the DNS TXT record of the domain
-    - Verify the domain with DNS TXT records challenge
+    - Verify the domain with DNS TXT records challenge and the manifest
     - Add logo url that will be displayed when a user is loging in using silkey
     - Send a transaction which will save the registration
 
     Some amount of ether is used to send transaction to blockchain.
     To obtain free ether on the Sandbox (Rinkeby test network) visit https://faucet.rinkeby.io/
     
-3.  Export private key from MetaMask and store it in a secure way inside your application. You will need it to generate the request for *Silkey Sing In*.
+3.  Export private key from MetaMask and store it in a secure way inside your application. You will need it to generate the request for *Silkey Sign In*.
 
 #### On SignIn page
 
@@ -120,6 +122,7 @@ const requestParams = silkeySdk.generateSSORequestParams(privateKey, {
   ssoCancelUrl: "https://domain/cancel",
   ssoScope: "email",
   ssoRefId: "54321",
+  ssoRedirectMethod: "POST",
 });
 
 // Add the generated params to silkey url as queryString.
@@ -185,9 +188,9 @@ If yes, you should update it, because old email might be not valid any more.
 
 ## Migration
 
-Migration process assumes, that your website is already prepared to *Sing in With Silkey*.
+Migration process assumes, that your website is already prepared to *Sign in With Silkey*.
 
-When user already has account on your website, he can migrate to Silkey and use *Sing in With Silkey* from now on.
+When user already has account on your website, he can migrate to Silkey and use *Sign in With Silkey* from now on.
 
 Migration process can vary and it depends entirely on how your website operates. 
 But this is the general flow how it should look like:
