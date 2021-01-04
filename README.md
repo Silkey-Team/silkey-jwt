@@ -91,7 +91,8 @@ The Production
     - Login with metamask
     - Click on Register Domain and enter domain of your application
     - Click "Connect Existing Wallet" to use the metamask account
-    - Generate a manifest that is an example authentication call and serve it at [your domain]/silkey.json
+    - Generate a manifest. It will be used mainly to detect if website supports Silkey and as default way to get authentication parameters for call.
+    - Serve manifest at `https://[your domain]/silkey.json`
     - Make sure to allow CORS from the Apollo url so we can verify/use the manifest
     - Generate a challenge and add it into the DNS TXT record of the domain
     - Verify the domain with DNS TXT records challenge and the manifest
