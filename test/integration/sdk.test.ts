@@ -18,6 +18,8 @@ describe('sso', () => {
       const emptySig = (await wallet.signMessage('')).toString()
       const abcSig = (await wallet.signMessage('abc')).toString()
 
+      console.log(`signature of 'abc' by ${webPublicKey}: ${abcSig}`)
+
       expect(await wallet.getAddress()).to.eq(webPublicKey)
 
       expect(await ethers.utils.verifyMessage('', emptySig)).to.eq(webPublicKey)

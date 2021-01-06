@@ -62,7 +62,7 @@ describe('sso', () => {
     })
 
     it('generates signature for SSO request', async () => {
-      const data = {ssoTimestamp: 1602151787, ssoRedirectUrl: 'http', ssoCancelUrl: 'http', ssoSignature: 'sig'}
+      const data = {ssoTimestamp: 1602151787, ssoRedirectUrl: 'http', ssoCancelUrl: 'http'}
       const params = await generateSSORequestParams(webPrivateKey, data)
       const sig = '0xba6a1d96fae8aeac3ab0df505a48d678e45bfe3080affcee703b011978a137255968daf3ef63186f4f67117a1522ab' +
         '19aef325e48e1db985343a084881b0f0391c'
@@ -100,14 +100,12 @@ describe('sso', () => {
         generateSSORequestParams(webPrivateKey, {
           ssoTimestamp: 0,
           ssoRedirectUrl: 'http',
-          ssoCancelUrl: 'http',
-          ssoSignature: '1'
+          ssoCancelUrl: 'http'
         }),
         generateSSORequestParams(webPrivateKey, {
           ssoTimestamp: -1,
           ssoRedirectUrl: 'http',
-          ssoCancelUrl: 'http',
-          ssoSignature: '1'
+          ssoCancelUrl: 'http'
         })
       ]
 
@@ -124,7 +122,6 @@ describe('sso', () => {
         ssoRedirectUrl: 'http',
         ssoCancelUrl: 'http',
         ssoScope: 'id',
-        ssoSignature: '1',
         ssoRefId: undefined
       })
 
@@ -134,7 +131,6 @@ describe('sso', () => {
         ssoCancelUrl: 'http',
         ssoRefId: undefined,
         ssoScope: undefined,
-        ssoSignature: '1',
         a: null,
         b: undefined
       })

@@ -72,12 +72,11 @@ describe('Verifier', () => {
     const callbackParams = SSOParams.import({...callbackParamsForId, ssoSignature: ''})
 
     it('expect to return false when website signature not exists', () => {
-      expect(Verifier.verifyWebsiteSignature(JwtPayload.import({}), callbackParams, webPublicKey)).to.be.false
+      expect(Verifier.verifyWebsiteSignature(callbackParams, webPublicKey)).to.be.false
     })
 
-    it('expect to be truee when sig match', () => {
-      const jwtPayload = new JwtPayload().setScope('id').setAddress(webPublicKey)
-      expect(Verifier.verifyWebsiteSignature(jwtPayload, callbackParamsForId, webPublicKey)).to.be.true
+    it('expect to be true when sig match', () => {
+      expect(Verifier.verifyWebsiteSignature(callbackParamsForId, webPublicKey)).to.be.true
     })
   })
 
