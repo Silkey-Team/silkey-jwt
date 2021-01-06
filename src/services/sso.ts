@@ -143,7 +143,7 @@ export const tokenPayloadVerifier = (
       return null
     }
 
-    if (!Verifier.verifyWebsiteSignature(jwtPayload, ssoParams, websiteOwnerAddress)) {
+    if (!Verifier.verifyWebsiteSignature(ssoParams, websiteOwnerAddress)) {
       return null
     }
 
