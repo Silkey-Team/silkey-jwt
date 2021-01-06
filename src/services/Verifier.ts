@@ -33,10 +33,7 @@ export class Verifier {
     })
   }
 
-  static verifyWebsiteSignature = (
-    tokenPayload: JwtPayload | KeyValueI,
-    ssoParams: SSOParamsI, websiteOwnerAddress: string
-  ): boolean => {
+  static verifyWebsiteSignature = (ssoParams: SSOParamsI, websiteOwnerAddress: string): boolean => {
     try {
       if (!ssoParams.ssoSignature) {
         console.warn('ssoSignature is empty')
@@ -140,6 +137,7 @@ export class Verifier {
         return false
       }
 
+      // verify message even if silkeyEthAddress is not set
       const signer = ethers.utils.verifyMessage(payload.messageToSignBySilkey(), payload.silkeySignature)
 
       if (!silkeyEthAddress) {
