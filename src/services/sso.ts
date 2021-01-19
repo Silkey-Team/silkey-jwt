@@ -139,10 +139,6 @@ export const tokenPayloadVerifier = (
       return null
     }
 
-    if (Verifier.verifySilkeySignature(jwtPayload, silkeyEthAddress) === false) {
-      return null
-    }
-
     if (!Verifier.verifyWebsiteSignature(ssoParams, websiteOwnerAddress)) {
       return null
     }
