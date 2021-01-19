@@ -185,7 +185,7 @@ describe('sso', () => {
     it('validates token for scope ID and returns payload', () => {
       const payload = tokenPayloadVerifier(validScopeIdToken, callbackParamsForId, webPublicKey, publicKey, 0)
       expect(payload).not.to.be.null
-      expect(payload?.address).not.to.undefined
+      expect(payload!.address).not.to.undefined
     })
 
     it('validates token for scope:email and returns payload', () => {
